@@ -334,19 +334,34 @@ function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStr
 // ── Tool ──────────────────────────────────────────────────
 const cursorPen = document.getElementById('cursorPen');
 const cursorEraser = document.getElementById('cursorEraser');
-document.addEventListener('mousemove', (e) => {
-  cursorPen.style.left = e.clientX+'px'; cursorPen.style.top = e.clientY+'px';
-  cursorEraser.style.left = e.clientX+'px'; cursorEraser.style.top = e.clientY+'px';
-});
+
+// Pe mobile/touch nu afisam cursorul custom - degetul e cursorul
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+if (!isTouchDevice) {
+  document.addEventListener('mousemove', (e) => {
+    cursorPen.style.left = e.clientX+'px'; cursorPen.style.top = e.clientY+'px';
+    cursorEraser.style.left = e.clientX+'px'; cursorEraser.style.top = e.clientY+'px';
+  });
+}
 
 function setTool(t) {
   tool = t;
   document.getElementById('penBtn').classList.toggle('active', t==='pen');
   document.getElementById('eraserBtn').classList.toggle('active', t==='eraser');
-  document.body.classList.toggle('pen-mode', t==='pen');
-  document.body.classList.toggle('eraser-mode', t==='eraser');
-  cursorPen.style.display = t==='pen' ? 'block' : 'none';
-  cursorEraser.style.display = t==='eraser' ? 'block' : 'none';
+  if (isTouchDevice) {
+    // Pe mobile: cursor normal, fara emoji flotant
+    document.body.classList.remove('pen-mode', 'eraser-mode');
+    cursorPen.style.display = 'none';
+    cursorEraser.style.display = 'none';
+    // Schimba doar culoarea butonului activ ca feedback vizual
+    document.getElementById('drawCanvas').style.cursor = 'crosshair';
+  } else {
+    document.body.classList.toggle('pen-mode', t==='pen');
+    document.body.classList.toggle('eraser-mode', t==='eraser');
+    cursorPen.style.display = t==='pen' ? 'block' : 'none';
+    cursorEraser.style.display = t==='eraser' ? 'block' : 'none';
+  }
 }
 setTool('pen');
 
