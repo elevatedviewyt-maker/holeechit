@@ -170,17 +170,43 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
-  .header { padding: 14px 10px 6px; }
-  .logo-img { width: 90px; }
-  .title { font-size: 2.2rem; }
-  .header-left { top: 12px; left: 8px; gap: 4px; }
-  .join-btn-header { top: 12px; right: 8px; font-size: 0.9rem; padding: 6px 12px; }
-  .lang-btn { font-size: 0.75rem; padding: 3px 8px; }
-  .toolbar { gap: 8px; padding: 7px 10px; }
-  .tool-btn { font-size: 0.85rem; padding: 5px 10px; }
-  .board-chat-wrap { flex-direction: column; padding: 8px 8px 6px; gap: 8px; }
-  .board-container { height: 300px; min-height: 300px; }
-  .chat-panel { width: 100%; height: 240px; }
+  .header { padding: 12px 8px 4px; }
+  .logo-img { width: 80px; }
+  .title { font-size: 2rem; }
+  .header-left { top: 10px; left: 6px; gap: 3px; }
+  .join-btn-header { top: 10px; right: 6px; font-size: 0.85rem; padding: 5px 10px; }
+  .lang-btn { font-size: 0.7rem; padding: 2px 7px; }
+  .toolbar { gap: 6px; padding: 6px 8px; }
+  .tool-btn { font-size: 0.8rem; padding: 4px 8px; }
+
+  /* Tab switcher */
+  .mobile-tabs { display: flex; border-bottom: 2px solid #FFD700; }
+  .mobile-tab {
+    flex: 1; text-align: center; padding: 10px;
+    font-family: 'Bangers', cursive; font-size: 1rem;
+    color: #7a5500; cursor: pointer; letter-spacing: 0.08em;
+    background: #1a0a00; border: none; transition: all 0.15s;
+  }
+  .mobile-tab.active { color: #FFD700; background: #2a1500; }
+
+  /* Board+chat layout on mobile */
+  .board-chat-wrap { flex-direction: column; padding: 0; gap: 0; }
+  .board-outer { width: 100%; }
+  .board-outer.tab-hidden { display: none; }
+  .board-container {
+    height: calc(100vh - 320px);
+    min-height: 250px;
+    border-radius: 0;
+  }
+  .chat-panel {
+    width: 100%;
+    height: calc(100vh - 320px);
+    min-height: 250px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .chat-panel.tab-hidden { display: none; }
 }
 </style>
 </head>
@@ -241,6 +267,12 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
     <input type="color" class="color-picker" id="colorPicker" value="#1a0a00">
   </div>
   <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ <span data-en="CLEAR ALL" data-zh="清除全部">CLEAR ALL</span></button>
+</div>
+
+<!-- MOBILE TABS (hidden on desktop via JS) -->
+<div class="mobile-tabs" id="mobileTabs" style="display:none">
+  <button class="mobile-tab active" id="tabDraw" onclick="switchTab('draw')">✏️ DRAW</button>
+  <button class="mobile-tab" id="tabChat" onclick="switchTab('chat')">💬 CHAT</button>
 </div>
 
 <!-- BOARD + CHAT -->
@@ -609,10 +641,53 @@ function setLang(l) {
   if (ws_el.classList.contains('connected')) ws_el.textContent = l === 'en' ? '● live' : '● 实时';
 }
 
+// ── Mobile tabs ───────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 600; }
+
+function initMobileTabs() {
+  if (isMobile()) {
+    document.getElementById('mobileTabs').style.display = 'flex';
+    switchTab('draw');
+  }
+}
+
+function switchTab(tab) {
+  const boardOuter = document.querySelector('.board-outer');
+  const chatPanel  = document.getElementById('chatPanel');
+  const tabDraw    = document.getElementById('tabDraw');
+  const tabChat    = document.getElementById('tabChat');
+  if (tab === 'draw') {
+    boardOuter.classList.remove('tab-hidden');
+    chatPanel.classList.add('tab-hidden');
+    tabDraw.classList.add('active');
+    tabChat.classList.remove('active');
+    resizeCanvas(); replayStrokes();
+  } else {
+    boardOuter.classList.add('tab-hidden');
+    chatPanel.classList.remove('tab-hidden');
+    tabDraw.classList.remove('active');
+    tabChat.classList.add('active');
+    // scroll chat to bottom
+    const box = document.getElementById('chatMessages');
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (isMobile()) {
+    document.getElementById('mobileTabs').style.display = 'flex';
+  } else {
+    document.getElementById('mobileTabs').style.display = 'none';
+    document.querySelector('.board-outer').classList.remove('tab-hidden');
+    document.getElementById('chatPanel').classList.remove('tab-hidden');
+  }
+});
+
 // ── Init ──────────────────────────────────────────────────
 loadUser();
 updateUI();
 connect();
+initMobileTabs();
 </script>
 </body>
 </html>
