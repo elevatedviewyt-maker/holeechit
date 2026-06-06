@@ -171,11 +171,17 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
-  .chat-panel { width: 100%; height: 220px; }
-  .board-chat-wrap { flex-direction: column; padding: 10px 12px; }
-  .board-container { height: calc(100vh - 420px); min-height: 280px; }
-  .header-left { top: 14px; left: 10px; gap: 6px; }
-  .join-btn-header { top: 14px; right: 10px; }
+  .header { padding: 14px 10px 6px; }
+  .logo-img { width: 90px; }
+  .title { font-size: 2.2rem; }
+  .header-left { top: 12px; left: 8px; gap: 4px; }
+  .join-btn-header { top: 12px; right: 8px; font-size: 0.9rem; padding: 6px 12px; }
+  .lang-btn { font-size: 0.75rem; padding: 3px 8px; }
+  .toolbar { gap: 8px; padding: 7px 10px; }
+  .tool-btn { font-size: 0.85rem; padding: 5px 10px; }
+  .board-chat-wrap { flex-direction: column; padding: 8px 8px 6px; gap: 8px; }
+  .board-container { height: 55vw; min-height: 220px; max-height: 340px; }
+  .chat-panel { width: 100%; height: 240px; }
 }
 </style>
 </head>
