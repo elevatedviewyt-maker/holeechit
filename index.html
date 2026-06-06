@@ -16,7 +16,15 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .title { font-size: clamp(2.6rem, 8vw, 6rem); color: #FFD700; text-shadow: 4px 4px 0 #7a5500, -2px -2px 0 #7a5500, 2px -2px 0 #7a5500, -2px 2px 0 #7a5500; letter-spacing: 0.05em; line-height: 1; margin-bottom: 2px; }
 .subtitle { font-family: 'Permanent Marker', cursive; font-size: clamp(0.7rem, 1.8vw, 1rem); color: #ff6b35; letter-spacing: 0.12em; margin-bottom: 10px; }
 
-/* JOIN button in header */
+.header-left { position: absolute; top: 24px; left: 24px; display: flex; align-items: center; gap: 10px; }
+.lang-switcher { display: flex; gap: 4px; }
+.lang-btn { background: transparent; border: 2px solid #7a5500; color: #7a5500; font-family: 'Bangers', cursive; font-size: 0.9rem; padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
+.lang-btn:hover { border-color: #FFD700; color: #FFD700; }
+.lang-btn.active { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); }
+.x-link { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #000; border: 2px solid #7a5500; border-radius: 6px; text-decoration: none; transition: all 0.15s; flex-shrink: 0; }
+.x-link:hover { border-color: #FFD700; transform: scale(1.1); }
+.x-link svg { width: 16px; height: 16px; fill: #fff; }
+
 .join-btn-header { position: absolute; top: 24px; right: 24px; background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 20px; cursor: pointer; border-radius: 4px; letter-spacing: 0.08em; transition: all 0.15s; }
 .join-btn-header:hover { background: #FFD700; color: #1a0a00; }
 .join-btn-header.joined { border-color: #4cff72; color: #4cff72; font-size: 0.85rem; padding: 6px 14px; }
@@ -36,9 +44,10 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .clear-btn { border-color: #ff4444; color: #ff4444; background: #2a0000; }
 .clear-btn:hover { background: #ff4444; color: white; }
 
-/* BOARD */
-.board-outer { display: flex; justify-content: center; align-items: flex-start; padding: 18px 24px 10px; background: #1a0a00; }
-.board-container { position: relative; width: 100%; max-width: 1200px; height: calc(100vh - 310px); min-height: 400px; border-radius: 6px; overflow: hidden; }
+/* BOARD + CHAT LAYOUT */
+.board-chat-wrap { display: flex; align-items: flex-start; padding: 18px 24px 10px; gap: 14px; background: #1a0a00; }
+.board-outer { flex: 1; min-width: 0; }
+.board-container { position: relative; width: 100%; height: calc(100vh - 310px); min-height: 400px; border-radius: 6px; overflow: hidden; }
 
 /* Parchment */
 .parchment-bg {
@@ -51,85 +60,89 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
     radial-gradient(ellipse at 50% 50%, #f0d9a0 0%, #e0c070 100%);
   border: 14px solid transparent;
   border-image: linear-gradient(135deg, #8B5E1A, #c8941a, #7a4f10, #b8841a, #8B5E1A) 1;
-  box-shadow:
-    inset 0 0 60px rgba(0,0,0,0.18),
-    inset 0 0 120px rgba(100,60,0,0.12),
-    inset 6px 6px 20px rgba(139,94,26,0.2),
-    inset -6px -6px 20px rgba(100,60,0,0.15),
-    0 8px 40px rgba(0,0,0,0.7),
-    0 2px 8px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.18), 0 8px 40px rgba(0,0,0,0.7);
 }
-/* Torn/aged corners */
 .parchment-bg::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 0% 0%, rgba(139,94,26,0.35) 0%, transparent 25%),
-    radial-gradient(ellipse at 100% 0%, rgba(100,60,0,0.3) 0%, transparent 22%),
-    radial-gradient(ellipse at 0% 100%, rgba(100,60,0,0.3) 0%, transparent 22%),
-    radial-gradient(ellipse at 100% 100%, rgba(139,94,26,0.35) 0%, transparent 25%);
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 0% 0%, rgba(139,94,26,0.35) 0%, transparent 25%), radial-gradient(ellipse at 100% 0%, rgba(100,60,0,0.3) 0%, transparent 22%), radial-gradient(ellipse at 0% 100%, rgba(100,60,0,0.3) 0%, transparent 22%), radial-gradient(ellipse at 100% 100%, rgba(139,94,26,0.35) 0%, transparent 25%);
   pointer-events: none;
 }
-/* Faint stains */
-.parchment-bg::after {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 40%, rgba(139,94,26,0.07) 0%, transparent 30%),
-    radial-gradient(ellipse at 70% 65%, rgba(100,60,0,0.06) 0%, transparent 25%);
-  pointer-events: none;
-}
-
 #drawCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; z-index: 2; }
 
-/* LOGIN OVERLAY */
-.login-overlay {
-  position: absolute; inset: 0; z-index: 10;
-  background: rgba(20,8,0,0.72);
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(2px);
+/* CHAT */
+.chat-panel {
+  width: 240px; flex-shrink: 0;
+  height: calc(100vh - 310px); min-height: 400px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid #7a5500;
   border-radius: 6px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
 }
+.chat-header {
+  background: #2a1500; border-bottom: 2px solid #7a5500;
+  padding: 8px 12px;
+  font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em;
+  text-align: center; flex-shrink: 0;
+}
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+  scrollbar-width: thin; scrollbar-color: #7a5500 transparent;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: #7a5500; border-radius: 2px; }
+.chat-msg { font-family: 'Permanent Marker', cursive; font-size: 0.68rem; line-height: 1.4; word-break: break-word; }
+.chat-msg .chat-name { color: #FFD700; font-size: 0.72rem; display: block; margin-bottom: 1px; }
+.chat-msg .chat-text { color: rgba(255,235,180,0.85); }
+.chat-msg .chat-time { color: rgba(255,215,0,0.25); font-size: 0.55rem; float: right; margin-top: 2px; }
+.chat-input-wrap {
+  display: flex; border-top: 2px solid #7a5500; flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; background: #1a0a00; border: none; outline: none;
+  color: #FFD700; font-family: 'Permanent Marker', cursive;
+  font-size: 0.72rem; padding: 8px 10px;
+  placeholder-color: rgba(255,215,0,0.3);
+}
+.chat-input::placeholder { color: rgba(255,215,0,0.3); }
+.chat-send {
+  background: #2a1500; border: none; border-left: 2px solid #7a5500;
+  color: #FFD700; font-size: 1rem; padding: 0 10px;
+  cursor: pointer; transition: background 0.12s;
+}
+.chat-send:hover { background: #FFD700; color: #1a0a00; }
+.chat-locked { text-align: center; padding: 12px 8px; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.35); font-size: 0.65rem; line-height: 1.6; }
+
+/* LOGIN OVERLAY */
+.login-overlay { position: absolute; inset: 0; z-index: 10; background: rgba(20,8,0,0.72); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); border-radius: 6px; }
 .login-overlay.hidden { display: none; }
-.login-box {
-  background: #1a0a00;
-  border: 3px solid #FFD700;
-  border-radius: 8px;
-  padding: 32px 36px;
-  text-align: center;
-  max-width: 360px;
-  width: 90%;
-  box-shadow: 0 0 60px rgba(255,215,0,0.15);
-}
+.login-box { background: #1a0a00; border: 3px solid #FFD700; border-radius: 8px; padding: 32px 36px; text-align: center; max-width: 360px; width: 90%; box-shadow: 0 0 60px rgba(255,215,0,0.15); }
 .login-box h2 { color: #FFD700; font-size: 2rem; margin-bottom: 4px; letter-spacing: 0.05em; }
 .login-box p { font-family: 'Permanent Marker', cursive; color: #ff6b35; font-size: 0.8rem; margin-bottom: 22px; letter-spacing: 0.08em; }
-.login-input {
-  width: 100%; background: #2a1500; border: 2px solid #FFD700; color: #FFD700;
-  font-family: 'Permanent Marker', cursive; font-size: 0.95rem;
-  padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; outline: none;
-  letter-spacing: 0.04em;
-}
+.login-input { width: 100%; background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Permanent Marker', cursive; font-size: 0.95rem; padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; outline: none; letter-spacing: 0.04em; }
 .login-input::placeholder { color: rgba(255,215,0,0.35); }
 .login-input:focus { border-color: #ff6b35; }
-.login-submit {
-  width: 100%; background: #FFD700; border: none; color: #1a0a00;
-  font-family: 'Bangers', cursive; font-size: 1.3rem; padding: 11px;
-  border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.12s;
-  margin-top: 4px;
-}
+.login-input.input-error { border-color: #ff4444; }
+.login-submit { width: 100%; background: #FFD700; border: none; color: #1a0a00; font-family: 'Bangers', cursive; font-size: 1.3rem; padding: 11px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.12s; margin-top: 4px; }
 .login-submit:hover { background: #ff6b35; color: white; }
 .login-error { color: #ff4444; font-family: 'Permanent Marker', cursive; font-size: 0.78rem; margin-top: 8px; display: none; }
 
-/* MODAL OVERLAY (JOIN popup when already logged in) */
+/* MODAL */
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
 .modal-overlay.hidden { display: none; }
-.modal-box { background: #1a0a00; border: 3px solid #FFD700; border-radius: 8px; padding: 28px 32px; text-align: center; max-width: 340px; width: 90%; box-shadow: 0 0 60px rgba(255,215,0,0.15); }
+.modal-box { background: #1a0a00; border: 3px solid #FFD700; border-radius: 8px; padding: 28px 32px; text-align: center; max-width: 360px; width: 90%; box-shadow: 0 0 60px rgba(255,215,0,0.15); }
 .modal-box h2 { color: #FFD700; font-size: 1.8rem; margin-bottom: 16px; }
-.modal-box .user-info { font-family: 'Permanent Marker', cursive; color: #ff6b35; font-size: 0.85rem; line-height: 1.8; margin-bottom: 18px; }
-.modal-box .user-info span { color: #FFD700; }
-.modal-close { background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 24px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; margin-right: 8px; }
+.modal-edit-field { width: 100%; background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Permanent Marker', cursive; font-size: 0.9rem; padding: 9px 12px; border-radius: 4px; margin-bottom: 10px; outline: none; }
+.modal-edit-field:focus { border-color: #ff6b35; }
+.modal-edit-field.input-error { border-color: #ff4444; }
+.modal-err { color: #ff4444; font-family: 'Permanent Marker', cursive; font-size: 0.72rem; margin-bottom: 10px; display: none; text-align: left; }
+.modal-btns { display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+.modal-close { background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; }
 .modal-close:hover { background: #FFD700; color: #1a0a00; }
-.modal-logout { background: transparent; border: 2px solid #ff4444; color: #ff4444; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 24px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; }
+.modal-save { background: #FFD700; border: 2px solid #FFD700; color: #1a0a00; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; }
+.modal-save:hover { background: #ff6b35; border-color: #ff6b35; color: white; }
+.modal-logout { background: transparent; border: 2px solid #ff4444; color: #ff4444; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; }
 .modal-logout:hover { background: #ff4444; color: white; }
 
 /* STATUS */
@@ -140,19 +153,14 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4cff72; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.6); } }
 
-.footer-note { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.3); font-size: 0.65rem; padding: 5px; letter-spacing: 0.1em; }
-
+/* CURSOR */
 .cursor-custom { position: fixed; pointer-events: none; z-index: 9999; font-size: 24px; display: none; line-height: 1; }
 #cursorPen { transform: translate(-15%, -85%); }
 #cursorEraser { transform: translate(-40%, -60%); }
 .pen-mode #drawCanvas { cursor: none; }
 .eraser-mode #drawCanvas { cursor: none; }
 
-.lang-switcher { position: absolute; top: 24px; left: 24px; display: flex; gap: 4px; }
-.lang-btn { background: transparent; border: 2px solid #7a5500; color: #7a5500; font-family: 'Bangers', cursive; font-size: 0.9rem; padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
-.lang-btn:hover { border-color: #FFD700; color: #FFD700; }
-.lang-btn.active { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); }
-
+/* FOOTER */
 .footer-section { background: #0e0500; border-top: 2px solid #3a2000; padding: 32px 24px 20px; }
 .footer-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; max-width: 900px; margin: 0 auto 24px; }
 .footer-block { text-align: center; max-width: 240px; }
@@ -160,6 +168,15 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .footer-block-title { font-family: 'Bangers', cursive; color: #FFD700; font-size: 1.1rem; letter-spacing: 0.1em; margin-bottom: 8px; }
 .footer-block-text { font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.45); font-size: 0.7rem; line-height: 1.7; letter-spacing: 0.04em; }
 .footer-bottom { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.3); font-size: 0.65rem; padding-top: 16px; letter-spacing: 0.1em; border-top: 1px solid #2a1000; margin-top: 8px; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .chat-panel { width: 100%; height: 220px; }
+  .board-chat-wrap { flex-direction: column; padding: 10px 12px; }
+  .board-container { height: calc(100vh - 420px); min-height: 280px; }
+  .header-left { top: 14px; left: 10px; gap: 6px; }
+  .join-btn-header { top: 14px; right: 10px; }
+}
 </style>
 </head>
 <body>
@@ -167,29 +184,42 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 <div class="cursor-custom" id="cursorPen">✏️</div>
 <div class="cursor-custom" id="cursorEraser">🧽</div>
 
-<!-- MODAL: profile info popup -->
+<!-- PROFILE MODAL -->
 <div class="modal-overlay hidden" id="profileModal">
   <div class="modal-box">
-    <h2>YOUR PROFILE</h2>
-    <div class="user-info">
-      Name: <span id="modalName">-</span><br>
-      BTC: <span id="modalBtc" style="font-size:0.7rem;word-break:break-all;">-</span>
+    <h2 data-en="YOUR PROFILE" data-zh="你的资料">YOUR PROFILE</h2>
+    <input class="modal-edit-field" id="editName" type="text" maxlength="32" placeholder="Name / nickname">
+    <input class="modal-edit-field" id="editBtc" type="text" maxlength="90" placeholder="Bitcoin address (bc1...)">
+    <div class="modal-err" id="editErr"></div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveProfile()" data-en="SAVE" data-zh="保存">SAVE</button>
+      <button class="modal-close" onclick="closeModal()" data-en="CLOSE" data-zh="关闭">CLOSE</button>
+      <button class="modal-logout" onclick="logout()" data-en="LOGOUT" data-zh="退出">LOGOUT</button>
     </div>
-    <button class="modal-close" onclick="closeModal()">CLOSE</button>
-    <button class="modal-logout" onclick="logout()">LOGOUT</button>
   </div>
 </div>
 
 <!-- HEADER -->
 <div class="header">
-  <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo" onload="document.getElementById('titleText').style.display='none'" onerror="this.style.display='none'">
+  <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo"
+    onload="document.getElementById('titleText').style.display='none'"
+    onerror="this.style.display='none'">
   <div class="title" id="titleText">HO LEE CHIT</div>
   <div class="subtitle" data-en="$HooLeeChit on Bitcoin" data-zh="比特币上的 $HooLeeChit">$HooLeeChit on Bitcoin</div>
-  <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()" data-en-joined="👤 " data-zh-joined="👤 ">JOIN</button>
-  <div class="lang-switcher">
-    <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
+
+  <div class="header-left">
+    <a class="x-link" href="https://x.com/holeechitrune" target="_blank" rel="noopener" title="Follow on X">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
+    </div>
   </div>
+
+  <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()">JOIN</button>
 </div>
 
 <!-- TOOLBAR -->
@@ -208,25 +238,42 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
   <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ <span data-en="CLEAR ALL" data-zh="清除全部">CLEAR ALL</span></button>
 </div>
 
-<!-- BOARD -->
-<div class="board-outer">
-  <div class="board-container">
-    <div class="parchment-bg"></div>
-    <canvas id="drawCanvas"></canvas>
-    <!-- Login overlay on top of board -->
-    <div class="login-overlay" id="loginOverlay">
-      <div class="login-box">
-        <h2 data-en="JOIN THE BOARD" data-zh="加入画板">JOIN THE BOARD</h2>
-        <p data-en="enter your details to draw, ser" data-zh="输入你的信息开始画画">enter your details to draw, ser</p>
-        <input class="login-input" id="inputName" type="text" placeholder="Your name / nickname" maxlength="32">
-        <input class="login-input" id="inputBtc" type="text" placeholder="Bitcoin address (bc1...)" maxlength="90">
-        <button class="login-submit" onclick="submitJoin()"><span data-en="LET ME DRAW 🖊️" data-zh="开始画画 🖊️">LET ME DRAW 🖊️</span></button>
-        <div class="login-error" id="loginError" data-en="Please enter at least your name!" data-zh="请输入你的名字！">Please enter at least your name!</div>
+<!-- BOARD + CHAT -->
+<div class="board-chat-wrap">
+  <div class="board-outer">
+    <div class="board-container">
+      <div class="parchment-bg"></div>
+      <canvas id="drawCanvas"></canvas>
+      <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+          <h2 data-en="JOIN THE BOARD" data-zh="加入画板">JOIN THE BOARD</h2>
+          <p data-en="enter your details to draw, ser" data-zh="输入你的信息开始画画">enter your details to draw, ser</p>
+          <input class="login-input" id="inputName" type="text" placeholder="Your name / nickname" maxlength="32">
+          <input class="login-input" id="inputBtc" type="text" placeholder="Bitcoin address (bc1...)" maxlength="90">
+          <button class="login-submit" onclick="submitJoin()">
+            <span data-en="LET ME DRAW 🖊️" data-zh="开始画画 🖊️">LET ME DRAW 🖊️</span>
+          </button>
+          <div class="login-error" id="loginError">Please enter at least your name!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">💬 <span data-en="LIVE CHAT" data-zh="实时聊天">LIVE CHAT</span></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div id="chatInputArea">
+      <div class="chat-locked" id="chatLocked" data-en="Join the board to chat" data-zh="加入画板才能聊天">Join the board to chat</div>
+      <div class="chat-input-wrap" id="chatInputWrap" style="display:none">
+        <input class="chat-input" id="chatInput" type="text" maxlength="300" placeholder="say something...">
+        <button class="chat-send" onclick="sendChat()">➤</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- FOOTER -->
 <div class="footer-section">
   <div class="footer-grid">
     <div class="footer-block">
@@ -256,26 +303,22 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 <div class="ws-status" id="wsStatus">connecting...</div>
 
 <script>
-// ════════════════════════════════════════════════════════
-// Inlocuieste cu URL-ul tau de pe Render.com
-// ════════════════════════════════════════════════════════
 const WS_URL = 'wss://holeechit-server.onrender.com';
 
-// ── User session (saved in localStorage) ─────────────────
 let currentUser = null;
+let ws = null;
 
+// ── User session ──────────────────────────────────────────
 function loadUser() {
   try {
     const saved = localStorage.getItem('hlc_user');
     if (saved) currentUser = JSON.parse(saved);
   } catch(e) { currentUser = null; }
 }
-
-function saveUser(name, btc) {
+function saveUserLocal(name, btc) {
   currentUser = { name, btc };
   localStorage.setItem('hlc_user', JSON.stringify(currentUser));
 }
-
 function logout() {
   localStorage.removeItem('hlc_user');
   currentUser = null;
@@ -286,45 +329,158 @@ function logout() {
 function updateUI() {
   const joinBtn = document.getElementById('joinBtn');
   const overlay = document.getElementById('loginOverlay');
+  const chatLocked = document.getElementById('chatLocked');
+  const chatInputWrap = document.getElementById('chatInputWrap');
   if (currentUser) {
     joinBtn.textContent = '👤 ' + currentUser.name;
     joinBtn.classList.add('joined');
     overlay.classList.add('hidden');
+    chatLocked.style.display = 'none';
+    chatInputWrap.style.display = 'flex';
   } else {
-    joinBtn.textContent = 'JOIN';
+    joinBtn.textContent = currentLang === 'zh' ? '加入' : 'JOIN';
     joinBtn.classList.remove('joined');
     overlay.classList.remove('hidden');
+    chatLocked.style.display = 'block';
+    chatInputWrap.style.display = 'none';
   }
 }
 
 function onJoinClick() {
   if (currentUser) {
-    // Show profile modal
-    document.getElementById('modalName').textContent = currentUser.name;
-    document.getElementById('modalBtc').textContent = currentUser.btc || 'not provided';
+    document.getElementById('editName').value = currentUser.name;
+    document.getElementById('editBtc').value = currentUser.btc || '';
+    document.getElementById('editErr').style.display = 'none';
+    document.getElementById('editName').classList.remove('input-error');
+    document.getElementById('editBtc').classList.remove('input-error');
     document.getElementById('profileModal').classList.remove('hidden');
   }
-  // If not logged in, the overlay is already visible on the board
 }
-
 function closeModal() {
   document.getElementById('profileModal').classList.add('hidden');
 }
-
-function submitJoin() {
-  const name = document.getElementById('inputName').value.trim();
-  const btc = document.getElementById('inputBtc').value.trim();
-  const err = document.getElementById('loginError');
-  if (!name) { err.style.display = 'block'; return; }
-  err.style.display = 'none';
-  saveUser(name, btc);
-  updateUI();
-}
-
-// Close modal on overlay click
 document.getElementById('profileModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+// ── Register (new user) ───────────────────────────────────
+function submitJoin() {
+  const name = document.getElementById('inputName').value.trim();
+  const btc  = document.getElementById('inputBtc').value.trim();
+  const err  = document.getElementById('loginError');
+  if (!name) { err.textContent = currentLang === 'zh' ? '请输入你的名字！' : 'Please enter at least your name!'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  document.getElementById('inputName').classList.remove('input-error');
+  document.getElementById('inputBtc').classList.remove('input-error');
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'register', name, btc }));
+  } else {
+    // Offline fallback: skip server validation
+    saveUserLocal(name, btc);
+    updateUI();
+  }
+}
+
+// ── Save profile (edit) ───────────────────────────────────
+function saveProfile() {
+  const newName = document.getElementById('editName').value.trim();
+  const newBtc  = document.getElementById('editBtc').value.trim();
+  const err     = document.getElementById('editErr');
+  if (!newName) { err.textContent = 'Name required'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'update_user', oldName: currentUser.name, newName, newBtc }));
+  } else {
+    saveUserLocal(newName, newBtc);
+    updateUI();
+    closeModal();
+  }
+}
+
+// ── Chat ──────────────────────────────────────────────────
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'chat', name: currentUser.name, text }));
+  }
+  input.value = '';
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const ci = document.getElementById('chatInput');
+  if (ci) ci.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+});
+
+function appendChatMsg(msg) {
+  const box = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'chat-msg';
+  const t = new Date(msg.ts);
+  const timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+  d.innerHTML = `<span class="chat-name">${escHtml(msg.name)}</span><span class="chat-text">${escHtml(msg.text)}</span><span class="chat-time">${timeStr}</span>`;
+  box.appendChild(d);
+  // Keep max 100 visible
+  while (box.children.length > 100) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── WebSocket ─────────────────────────────────────────────
+function connect() {
+  const status = document.getElementById('wsStatus');
+  status.textContent = 'connecting...'; status.className = 'ws-status';
+  try { ws = new WebSocket(WS_URL); } catch(e) { status.textContent = '⚠ offline'; status.className = 'ws-status error'; return; }
+
+  ws.onopen = () => { status.textContent = '● live'; status.className = 'ws-status connected'; };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'init') { allStrokes = msg.strokes || []; replayStrokes(); }
+    if (msg.type === 'stroke') { allStrokes.push(msg.stroke); drawStroke(msg.stroke); }
+    if (msg.type === 'clear') { allStrokes = []; ctx.clearRect(0,0,canvas.width,canvas.height); }
+    if (msg.type === 'presence') { document.getElementById('onlineCount').textContent = msg.count; }
+
+    if (msg.type === 'chat_init') {
+      document.getElementById('chatMessages').innerHTML = '';
+      (msg.messages || []).forEach(appendChatMsg);
+    }
+    if (msg.type === 'chat') { appendChatMsg(msg.msg); }
+
+    if (msg.type === 'register_ok') {
+      saveUserLocal(msg.name, msg.btc);
+      updateUI();
+    }
+    if (msg.type === 'register_err') {
+      const err = document.getElementById('loginError');
+      err.textContent = msg.msg;
+      err.style.display = 'block';
+      if (msg.field === 'name') document.getElementById('inputName').classList.add('input-error');
+      if (msg.field === 'btc')  document.getElementById('inputBtc').classList.add('input-error');
+    }
+
+    if (msg.type === 'update_ok') {
+      saveUserLocal(msg.name, msg.btc);
+      updateUI();
+      closeModal();
+    }
+    if (msg.type === 'update_err') {
+      const err = document.getElementById('editErr');
+      err.textContent = msg.msg;
+      err.style.display = 'block';
+      if (msg.field === 'name') document.getElementById('editName').classList.add('input-error');
+      if (msg.field === 'btc')  document.getElementById('editBtc').classList.add('input-error');
+    }
+  };
+
+  ws.onclose = () => { status.textContent = '⚠ reconnecting...'; status.className = 'ws-status error'; setTimeout(connect, 3000); };
+  ws.onerror = () => { status.textContent = '⚠ offline'; status.className = 'ws-status error'; };
+}
 
 // ── Canvas ────────────────────────────────────────────────
 const canvas = document.getElementById('drawCanvas');
@@ -341,25 +497,6 @@ resizeCanvas();
 let tool = 'pen', drawing = false, lastX = 0, lastY = 0;
 let color = '#1a0a00', size = 4;
 let allStrokes = [], currentPoints = [];
-let ws = null;
-
-// ── WebSocket ─────────────────────────────────────────────
-function connect() {
-  const status = document.getElementById('wsStatus');
-  status.textContent = 'connecting...'; status.className = 'ws-status';
-  try { ws = new WebSocket(WS_URL); } catch(e) { status.textContent = '⚠ offline'; status.className = 'ws-status error'; return; }
-  ws.onopen = () => { status.textContent = '● live'; status.className = 'ws-status connected'; };
-  ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.type === 'init') { allStrokes = msg.strokes || []; replayStrokes(); }
-    if (msg.type === 'stroke') { allStrokes.push(msg.stroke); drawStroke(msg.stroke); }
-    if (msg.type === 'clear') { allStrokes = []; ctx.clearRect(0,0,canvas.width,canvas.height); }
-    if (msg.type === 'presence') { document.getElementById('onlineCount').textContent = msg.count; }
-  };
-  ws.onclose = () => { status.textContent = '⚠ reconnecting...'; status.className = 'ws-status error'; setTimeout(connect, 3000); };
-  ws.onerror = () => { status.textContent = '⚠ offline'; status.className = 'ws-status error'; };
-}
-connect();
 
 function drawStroke(s) {
   if (!s.points || s.points.length < 2) return;
@@ -372,11 +509,9 @@ function drawStroke(s) {
 }
 function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStrokes.forEach(drawStroke); }
 
-// ── Tool ──────────────────────────────────────────────────
+// ── Cursor ────────────────────────────────────────────────
 const cursorPen = document.getElementById('cursorPen');
 const cursorEraser = document.getElementById('cursorEraser');
-
-// Pe mobile/touch dezactivam cursorul emoji - degetul e cursorul
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
 if (!isTouchDevice) {
@@ -391,11 +526,10 @@ function setTool(t) {
   document.getElementById('penBtn').classList.toggle('active', t==='pen');
   document.getElementById('eraserBtn').classList.toggle('active', t==='eraser');
   if (isTouchDevice) {
-    // Mobile: fara emoji flotant, cursor normal
     cursorPen.style.display = 'none';
     cursorEraser.style.display = 'none';
-    document.body.classList.remove('pen-mode', 'eraser-mode');
-    document.getElementById('drawCanvas').style.cursor = 'crosshair';
+    document.body.classList.remove('pen-mode','eraser-mode');
+    canvas.style.cursor = 'crosshair';
   } else {
     document.body.classList.toggle('pen-mode', t==='pen');
     document.body.classList.toggle('eraser-mode', t==='eraser');
@@ -408,7 +542,7 @@ setTool('pen');
 document.getElementById('sizeSlider').addEventListener('input', (e) => { size=parseInt(e.target.value); document.getElementById('sizeLabel').textContent=size; });
 document.getElementById('colorPicker').addEventListener('input', (e) => { color=e.target.value; });
 
-// ── Drawing ───────────────────────────────────────────────
+// ── Drawing events ────────────────────────────────────────
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
@@ -422,7 +556,6 @@ function drawLive(x1,y1,x2,y2) {
   ctx.globalCompositeOperation = tool==='eraser' ? 'destination-out' : 'source-over';
   ctx.stroke(); ctx.globalCompositeOperation='source-over';
 }
-
 function canDraw() { return !!currentUser; }
 
 canvas.addEventListener('mousedown', (e) => { if(!canDraw()) return; drawing=true; const p=getPos(e); lastX=p.x; lastY=p.y; currentPoints=[p]; });
@@ -430,7 +563,7 @@ canvas.addEventListener('mousemove', (e) => { if(!drawing||!canDraw()) return; c
 function endDraw() {
   if(!drawing) return; drawing=false;
   if(currentPoints.length<2) return;
-  const stroke = { color: tool==='eraser'?'#fff':color, size: tool==='eraser'?size*4:size, eraser: tool==='eraser', points: currentPoints };
+  const stroke = { color: tool==='eraser'?'rgba(0,0,0,1)':color, size: tool==='eraser'?size*4:size, eraser: tool==='eraser', points: currentPoints };
   allStrokes.push(stroke);
   if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'stroke',stroke}));
   currentPoints=[];
@@ -450,44 +583,31 @@ function clearBoard() {
 // ── i18n ──────────────────────────────────────────────────
 let currentLang = 'en';
 const placeholders = {
-  en: { name: 'Your name / nickname', btc: 'Bitcoin address (bc1...)' },
-  zh: { name: '你的名字 / 昵称', btc: '比特币地址 (bc1...)' }
+  en: { name: 'Your name / nickname', btc: 'Bitcoin address (bc1...)', chat: 'say something...' },
+  zh: { name: '你的名字 / 昵称', btc: '比特币地址 (bc1...)', chat: '说点什么...' }
 };
-const joinLabels = { en: 'JOIN', zh: '加入' };
 
 function setLang(l) {
   currentLang = l;
   document.getElementById('btnEN').classList.toggle('active', l === 'en');
   document.getElementById('btnZH').classList.toggle('active', l === 'zh');
-
-  // All elements with data-en / data-zh text content
   document.querySelectorAll('[data-en]').forEach(el => {
     if (el.tagName === 'INPUT') return;
     el.textContent = el.dataset[l];
   });
-
-  // Placeholders
   document.getElementById('inputName').placeholder = placeholders[l].name;
   document.getElementById('inputBtc').placeholder = placeholders[l].btc;
-
-  // JOIN button — only update if not logged in
-  const joinBtn = document.getElementById('joinBtn');
-  if (!currentUser) {
-    joinBtn.textContent = joinLabels[l];
-  } else {
-    joinBtn.textContent = '👤 ' + currentUser.name;
-  }
-
-  // ws status label
+  const ci = document.getElementById('chatInput');
+  if (ci) ci.placeholder = placeholders[l].chat;
+  if (!currentUser) document.getElementById('joinBtn').textContent = l === 'zh' ? '加入' : 'JOIN';
   const ws_el = document.getElementById('wsStatus');
-  if (ws_el.classList.contains('connected')) {
-    ws_el.textContent = l === 'en' ? '● live' : '● 实时';
-  }
+  if (ws_el.classList.contains('connected')) ws_el.textContent = l === 'en' ? '● live' : '● 实时';
 }
 
 // ── Init ──────────────────────────────────────────────────
 loadUser();
 updateUI();
+connect();
 </script>
 </body>
 </html>
