@@ -147,6 +147,19 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 #cursorEraser { transform: translate(-40%, -60%); }
 .pen-mode #drawCanvas { cursor: none; }
 .eraser-mode #drawCanvas { cursor: none; }
+
+.lang-switcher { position: absolute; top: 24px; left: 24px; display: flex; gap: 4px; }
+.lang-btn { background: transparent; border: 2px solid #7a5500; color: #7a5500; font-family: 'Bangers', cursive; font-size: 0.9rem; padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
+.lang-btn:hover { border-color: #FFD700; color: #FFD700; }
+.lang-btn.active { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); }
+
+.footer-section { background: #0e0500; border-top: 2px solid #3a2000; padding: 32px 24px 20px; }
+.footer-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; max-width: 900px; margin: 0 auto 24px; }
+.footer-block { text-align: center; max-width: 240px; }
+.footer-icon { font-size: 2rem; margin-bottom: 8px; }
+.footer-block-title { font-family: 'Bangers', cursive; color: #FFD700; font-size: 1.1rem; letter-spacing: 0.1em; margin-bottom: 8px; }
+.footer-block-text { font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.45); font-size: 0.7rem; line-height: 1.7; letter-spacing: 0.04em; }
+.footer-bottom { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.3); font-size: 0.65rem; padding-top: 16px; letter-spacing: 0.1em; border-top: 1px solid #2a1000; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -171,24 +184,28 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 <div class="header">
   <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo" onload="document.getElementById('titleText').style.display='none'" onerror="this.style.display='none'">
   <div class="title" id="titleText">HO LEE CHIT</div>
-  <div class="subtitle">$HooLeeChit on Bitcoin</div>
-  <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()">JOIN</button>
+  <div class="subtitle" data-en="$HooLeeChit on Bitcoin" data-zh="比特币上的 $HooLeeChit">$HooLeeChit on Bitcoin</div>
+  <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()" data-en-joined="👤 " data-zh-joined="👤 ">JOIN</button>
+  <div class="lang-switcher">
+    <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
+  </div>
 </div>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ PENCIL</button>
-  <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 SPONGE</button>
+  <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ <span data-en="PENCIL" data-zh="画笔">PENCIL</span></button>
+  <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 <span data-en="SPONGE" data-zh="橡皮">SPONGE</span></button>
   <div style="display:flex;align-items:center;gap:6px;">
-    <span class="label">SIZE</span>
+    <span class="label" data-en="SIZE" data-zh="大小">SIZE</span>
     <input type="range" class="size-slider" id="sizeSlider" min="1" max="40" value="4">
     <span class="label" id="sizeLabel">4</span>
   </div>
   <div style="display:flex;align-items:center;gap:6px;">
-    <span class="label">COLOR</span>
+    <span class="label" data-en="COLOR" data-zh="颜色">COLOR</span>
     <input type="color" class="color-picker" id="colorPicker" value="#1a0a00">
   </div>
-  <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ CLEAR ALL</button>
+  <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ <span data-en="CLEAR ALL" data-zh="清除全部">CLEAR ALL</span></button>
 </div>
 
 <!-- BOARD -->
@@ -199,19 +216,43 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
     <!-- Login overlay on top of board -->
     <div class="login-overlay" id="loginOverlay">
       <div class="login-box">
-        <h2>JOIN THE BOARD</h2>
-        <p>enter your details to draw, ser</p>
+        <h2 data-en="JOIN THE BOARD" data-zh="加入画板">JOIN THE BOARD</h2>
+        <p data-en="enter your details to draw, ser" data-zh="输入你的信息开始画画">enter your details to draw, ser</p>
         <input class="login-input" id="inputName" type="text" placeholder="Your name / nickname" maxlength="32">
         <input class="login-input" id="inputBtc" type="text" placeholder="Bitcoin address (bc1...)" maxlength="90">
-        <button class="login-submit" onclick="submitJoin()">LET ME DRAW 🖊️</button>
-        <div class="login-error" id="loginError">Please enter at least your name!</div>
+        <button class="login-submit" onclick="submitJoin()"><span data-en="LET ME DRAW 🖊️" data-zh="开始画画 🖊️">LET ME DRAW 🖊️</span></button>
+        <div class="login-error" id="loginError" data-en="Please enter at least your name!" data-zh="请输入你的名字！">Please enter at least your name!</div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="footer-note">✦ draw something, ser ✦ everyone sees it live ✦</div>
-<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> online</div>
+<div class="footer-section">
+  <div class="footer-grid">
+    <div class="footer-block">
+      <div class="footer-icon">🌍</div>
+      <div class="footer-block-title" data-en="WORLDWIDE CANVAS" data-zh="全球画板">WORLDWIDE CANVAS</div>
+      <div class="footer-block-text" data-en="One shared board. Anyone on the planet can draw on it, right now, in real time." data-zh="一块共享画板。地球上任何人都可以实时在上面画画。">One shared board. Anyone on the planet can draw on it, right now, in real time.</div>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">⚡</div>
+      <div class="footer-block-title" data-en="LIVE SYNC" data-zh="实时同步">LIVE SYNC</div>
+      <div class="footer-block-text" data-en="Every stroke you make appears instantly on everyone else's screen. No refresh needed." data-zh="你的每一笔都会立刻出现在其他人的屏幕上。无需刷新。">Every stroke you make appears instantly on everyone else's screen. No refresh needed.</div>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">₿</div>
+      <div class="footer-block-title" data-en="BITCOIN RUNE" data-zh="比特币符文">BITCOIN RUNE</div>
+      <div class="footer-block-text" data-en="$HooLeeChit is a meme Rune on Bitcoin. Join the community and leave your mark." data-zh="$HooLeeChit 是比特币上的梗符文。加入社区，留下你的印记。">$HooLeeChit is a meme Rune on Bitcoin. Join the community and leave your mark.</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-en="✦ draw something, ser ✦ everyone sees it live ✦" data-zh="✦ 画点什么吧 ✦ 全世界都能看到 ✦">✦ draw something, ser ✦ everyone sees it live ✦</span>
+    <br/>
+    <span style="opacity:0.4;font-size:0.55rem;letter-spacing:0.08em">© 2025 HO LEE CHIT</span>
+  </div>
+</div>
+
+<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> <span data-en="online" data-zh="在线">online</span></div>
 <div class="ws-status" id="wsStatus">connecting...</div>
 
 <script>
@@ -335,7 +376,7 @@ function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStr
 const cursorPen = document.getElementById('cursorPen');
 const cursorEraser = document.getElementById('cursorEraser');
 
-// Pe mobile/touch nu afisam cursorul custom - degetul e cursorul
+// Pe mobile/touch dezactivam cursorul emoji - degetul e cursorul
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
 if (!isTouchDevice) {
@@ -350,11 +391,10 @@ function setTool(t) {
   document.getElementById('penBtn').classList.toggle('active', t==='pen');
   document.getElementById('eraserBtn').classList.toggle('active', t==='eraser');
   if (isTouchDevice) {
-    // Pe mobile: cursor normal, fara emoji flotant
-    document.body.classList.remove('pen-mode', 'eraser-mode');
+    // Mobile: fara emoji flotant, cursor normal
     cursorPen.style.display = 'none';
     cursorEraser.style.display = 'none';
-    // Schimba doar culoarea butonului activ ca feedback vizual
+    document.body.classList.remove('pen-mode', 'eraser-mode');
     document.getElementById('drawCanvas').style.cursor = 'crosshair';
   } else {
     document.body.classList.toggle('pen-mode', t==='pen');
@@ -405,6 +445,44 @@ function clearBoard() {
   if(!confirm('Ho Lee Chit! Clear the entire board for everyone?')) return;
   allStrokes=[]; ctx.clearRect(0,0,canvas.width,canvas.height);
   if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'clear'}));
+}
+
+// ── i18n ──────────────────────────────────────────────────
+let currentLang = 'en';
+const placeholders = {
+  en: { name: 'Your name / nickname', btc: 'Bitcoin address (bc1...)' },
+  zh: { name: '你的名字 / 昵称', btc: '比特币地址 (bc1...)' }
+};
+const joinLabels = { en: 'JOIN', zh: '加入' };
+
+function setLang(l) {
+  currentLang = l;
+  document.getElementById('btnEN').classList.toggle('active', l === 'en');
+  document.getElementById('btnZH').classList.toggle('active', l === 'zh');
+
+  // All elements with data-en / data-zh text content
+  document.querySelectorAll('[data-en]').forEach(el => {
+    if (el.tagName === 'INPUT') return;
+    el.textContent = el.dataset[l];
+  });
+
+  // Placeholders
+  document.getElementById('inputName').placeholder = placeholders[l].name;
+  document.getElementById('inputBtc').placeholder = placeholders[l].btc;
+
+  // JOIN button — only update if not logged in
+  const joinBtn = document.getElementById('joinBtn');
+  if (!currentUser) {
+    joinBtn.textContent = joinLabels[l];
+  } else {
+    joinBtn.textContent = '👤 ' + currentUser.name;
+  }
+
+  // ws status label
+  const ws_el = document.getElementById('wsStatus');
+  if (ws_el.classList.contains('connected')) {
+    ws_el.textContent = l === 'en' ? '● live' : '● 实时';
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────
