@@ -524,9 +524,22 @@ const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
-  const c = canvas.parentElement;
-  canvas.width = c.clientWidth;
-  canvas.height = c.clientHeight;
+  const container = canvas.parentElement;
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  // Fix aspect ratio 4:3 — use the largest rect that fits
+  let cw, ch;
+  if (w / h > 4/3) {
+    ch = h; cw = Math.floor(h * 4/3);
+  } else {
+    cw = w; ch = Math.floor(w * 3/4);
+  }
+  canvas.width  = cw;
+  canvas.height = ch;
+  canvas.style.width  = cw + 'px';
+  canvas.style.height = ch + 'px';
+  canvas.style.display = 'block';
+  canvas.style.margin = 'auto';
 }
 window.addEventListener('resize', () => { resizeCanvas(); replayStrokes(); });
 resizeCanvas();
