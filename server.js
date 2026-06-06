@@ -1,45 +1,87 @@
 const http = require('http');
 const WebSocket = require('ws');
-const fs = require('fs');
-const path = require('path');
+const { MongoClient } = require('mongodb');
 
 const PORT = process.env.PORT || 3000;
-const STROKES_FILE = path.join(__dirname, 'strokes.json');
-const USERS_FILE = path.join(__dirname, 'users.json');
-const CHAT_FILE = path.join(__dirname, 'chat.json');
+const MONGO_URI = process.env.MONGO_URI;
+const ADMIN_PASS = process.env.ADMIN_PASS || 'changeme';
 
-// ── Load persisted data ───────────────────────────────────
+if (!MONGO_URI) { console.error('ERROR: MONGO_URI env var not set!'); process.exit(1); }
+
+// ── In-memory cache (loaded from MongoDB at startup) ──────
 let strokes = [];
 let users = {};   // { name_lower: { name, btc, createdAt }, ... }
-let chatAll = []; // full history, never deleted
+let chatAll = []; // full history
 const CHAT_BROADCAST_LIMIT = 100;
 
-function loadJSON(file, fallback) {
-  try {
-    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch(e) { console.error('Load error', file, e.message); }
-  return fallback;
+let db, colStrokes, colUsers, colChat;
+
+// ── MongoDB helpers ───────────────────────────────────────
+async function saveStrokes() {
+  await colStrokes.replaceOne({ _id: 'main' }, { _id: 'main', data: strokes }, { upsert: true });
 }
-function saveJSON(file, data) {
-  try { fs.writeFileSync(file, JSON.stringify(data)); } catch(e) { console.error('Save error', file, e.message); }
+async function saveUsers() {
+  await colUsers.replaceOne({ _id: 'main' }, { _id: 'main', data: users }, { upsert: true });
+}
+async function saveChat() {
+  await colChat.replaceOne({ _id: 'main' }, { _id: 'main', data: chatAll }, { upsert: true });
 }
 
-strokes = loadJSON(STROKES_FILE, []);
-users   = loadJSON(USERS_FILE, {});
-chatAll = loadJSON(CHAT_FILE, []);
-console.log(`Loaded: ${strokes.length} strokes, ${Object.keys(users).length} users, ${chatAll.length} chat msgs`);
+// ── Admin auth helper ─────────────────────────────────────
+function checkAdmin(req, res) {
+  const url = new URL(req.url, 'http://localhost');
+  if (url.searchParams.get('pass') !== ADMIN_PASS) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Forbidden: wrong ?pass=' }));
+    return false;
+  }
+  return true;
+}
 
 // ── HTTP server ───────────────────────────────────────────
 const server = http.createServer((req, res) => {
-  // Simple REST: GET /users and GET /chat for admin viewing
-  if (req.url === '/users') {
+  const url = new URL(req.url, 'http://localhost');
+  const pathname = url.pathname;
+
+  // GET /users?pass=xxx
+  if (req.method === 'GET' && pathname === '/users') {
+    if (!checkAdmin(req, res)) return;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(users, null, 2));
   }
-  if (req.url === '/chat') {
+
+  // GET /chat?pass=xxx
+  if (req.method === 'GET' && pathname === '/chat') {
+    if (!checkAdmin(req, res)) return;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(chatAll, null, 2));
   }
+
+  // DELETE /chat?pass=xxx — wipe all chat
+  if (req.method === 'DELETE' && pathname === '/chat') {
+    if (!checkAdmin(req, res)) return;
+    chatAll = [];
+    saveChat().catch(console.error);
+    broadcast({ type: 'chat_init', messages: [] });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, msg: 'Chat cleared' }));
+  }
+
+  // DELETE /chat/:index?pass=xxx — delete single message
+  if (req.method === 'DELETE' && pathname.startsWith('/chat/')) {
+    if (!checkAdmin(req, res)) return;
+    const idx = parseInt(pathname.split('/')[2], 10);
+    if (isNaN(idx) || idx < 0 || idx >= chatAll.length) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Invalid index' }));
+    }
+    const removed = chatAll.splice(idx, 1);
+    saveChat().catch(console.error);
+    broadcast({ type: 'chat_init', messages: chatAll.slice(-CHAT_BROADCAST_LIMIT) });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, removed }));
+  }
+
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Ho Lee Chit WS Server running!');
 });
@@ -52,7 +94,6 @@ wss.on('connection', (ws) => {
   clients.add(ws);
   console.log(`Client connected. Total: ${clients.size}`);
 
-  // Send initial state
   ws.send(JSON.stringify({ type: 'init', strokes }));
   ws.send(JSON.stringify({ type: 'chat_init', messages: chatAll.slice(-CHAT_BROADCAST_LIMIT) }));
   broadcast({ type: 'presence', count: clients.size });
@@ -65,7 +106,7 @@ wss.on('connection', (ws) => {
     if (data.type === 'stroke') {
       strokes.push(data.stroke);
       if (strokes.length > 5000) strokes = strokes.slice(-5000);
-      saveJSON(STROKES_FILE, strokes);
+      saveStrokes().catch(console.error);
       for (const client of clients) {
         if (client !== ws && client.readyState === WebSocket.OPEN)
           client.send(JSON.stringify({ type: 'stroke', stroke: data.stroke }));
@@ -74,11 +115,11 @@ wss.on('connection', (ws) => {
 
     if (data.type === 'clear') {
       strokes = [];
-      saveJSON(STROKES_FILE, strokes);
+      saveStrokes().catch(console.error);
       broadcast({ type: 'clear' });
     }
 
-    // ── User registration ──
+    // ── Register ──
     if (data.type === 'register') {
       const name = (data.name || '').trim();
       const btc  = (data.btc  || '').trim();
@@ -87,52 +128,47 @@ wss.on('connection', (ws) => {
       const nameKey = name.toLowerCase();
       const btcKey  = btc.toLowerCase();
 
-      // Check name uniqueness
-      if (users[nameKey]) {
+      if (users[nameKey])
         return ws.send(JSON.stringify({ type: 'register_err', field: 'name', msg: 'Name already taken' }));
-      }
-      // Check BTC uniqueness (if provided)
+
       if (btc) {
         const btcTaken = Object.values(users).some(u => u.btc && u.btc.toLowerCase() === btcKey);
-        if (btcTaken) {
+        if (btcTaken)
           return ws.send(JSON.stringify({ type: 'register_err', field: 'btc', msg: 'Wallet already registered' }));
-        }
       }
 
       users[nameKey] = { name, btc, createdAt: new Date().toISOString() };
-      saveJSON(USERS_FILE, users);
+      saveUsers().catch(console.error);
       ws.send(JSON.stringify({ type: 'register_ok', name, btc }));
     }
 
-    // ── User update (rename / change wallet) ──
+    // ── Update user ──
     if (data.type === 'update_user') {
       const oldName = (data.oldName || '').trim();
       const newName = (data.newName || '').trim();
       const newBtc  = (data.newBtc  || '').trim();
-      if (!oldName || !newName) return ws.send(JSON.stringify({ type: 'update_err', msg: 'Name required' }));
+      if (!oldName || !newName)
+        return ws.send(JSON.stringify({ type: 'update_err', msg: 'Name required' }));
 
       const oldKey = oldName.toLowerCase();
       const newKey = newName.toLowerCase();
 
-      // Name changed and new name taken by someone else
-      if (newKey !== oldKey && users[newKey]) {
+      if (newKey !== oldKey && users[newKey])
         return ws.send(JSON.stringify({ type: 'update_err', field: 'name', msg: 'Name already taken' }));
-      }
-      // BTC uniqueness check (ignore own current btc)
+
       if (newBtc) {
         const newBtcLow = newBtc.toLowerCase();
         const btcTaken = Object.values(users).some(u =>
           u.btc && u.btc.toLowerCase() === newBtcLow && u.name.toLowerCase() !== oldKey
         );
-        if (btcTaken) {
+        if (btcTaken)
           return ws.send(JSON.stringify({ type: 'update_err', field: 'btc', msg: 'Wallet already registered' }));
-        }
       }
 
-      // Delete old key, save new
+      const oldCreatedAt = users[oldKey]?.createdAt;
       delete users[oldKey];
-      users[newKey] = { name: newName, btc: newBtc, createdAt: users[oldKey]?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
-      saveJSON(USERS_FILE, users);
+      users[newKey] = { name: newName, btc: newBtc, createdAt: oldCreatedAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
+      saveUsers().catch(console.error);
       ws.send(JSON.stringify({ type: 'update_ok', name: newName, btc: newBtc }));
     }
 
@@ -144,9 +180,7 @@ wss.on('connection', (ws) => {
 
       const chatMsg = { name, text, ts: Date.now() };
       chatAll.push(chatMsg);
-      saveJSON(CHAT_FILE, chatAll);
-
-      // Broadcast last 100 to everyone
+      saveChat().catch(console.error);
       broadcast({ type: 'chat', msg: chatMsg });
     }
   });
@@ -167,4 +201,27 @@ function broadcast(data) {
   }
 }
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ── Connect to MongoDB then start server ──────────────────
+async function start() {
+  console.log('Connecting to MongoDB...');
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  db = client.db('holeechit');
+  colStrokes = db.collection('strokes');
+  colUsers   = db.collection('users');
+  colChat    = db.collection('chat');
+  console.log('MongoDB connected!');
+
+  // Load data into memory
+  const sDoc = await colStrokes.findOne({ _id: 'main' });
+  const uDoc = await colUsers.findOne({ _id: 'main' });
+  const cDoc = await colChat.findOne({ _id: 'main' });
+  strokes = sDoc?.data || [];
+  users   = uDoc?.data || {};
+  chatAll = cDoc?.data || [];
+  console.log(`Loaded: ${strokes.length} strokes, ${Object.keys(users).length} users, ${chatAll.length} chat msgs`);
+
+  server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+start().catch(err => { console.error('Startup error:', err); process.exit(1); });

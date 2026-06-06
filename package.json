@@ -6,6 +6,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "mongodb": "^6.3.0"
   }
 }
