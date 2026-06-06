@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HO LEE CHIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; overflow-x: hidden; user-select: none; }
+.header { text-align: center; padding: 24px 20px 8px; }
+.logo-img { width: 150px; height: auto; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+.title { font-size: clamp(2.8rem, 9vw, 6.5rem); color: #FFD700; text-shadow: 4px 4px 0 #7a5500, -2px -2px 0 #7a5500, 2px -2px 0 #7a5500, -2px 2px 0 #7a5500; letter-spacing: 0.05em; line-height: 1; margin-bottom: 2px; }
+.subtitle { font-family: 'Permanent Marker', cursive; font-size: clamp(0.75rem, 2vw, 1.1rem); color: #ff6b35; letter-spacing: 0.12em; margin-bottom: 14px; }
+.toolbar { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 10px 16px; background: rgba(0,0,0,0.5); border-top: 2px solid #FFD700; border-bottom: 2px solid #FFD700; flex-wrap: wrap; }
+.tool-btn { background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1.05rem; padding: 7px 16px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 6px; transition: all 0.12s; letter-spacing: 0.05em; }
+.tool-btn:hover, .tool-btn.active { background: #FFD700; color: #1a0a00; }
+.size-slider { -webkit-appearance: none; width: 90px; height: 5px; border-radius: 3px; background: #FFD700; outline: none; cursor: pointer; }
+.size-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #FFD700; border: 3px solid #1a0a00; cursor: pointer; }
+.color-picker { width: 36px; height: 36px; border: 3px solid #FFD700; border-radius: 50%; cursor: pointer; background: none; padding: 0; overflow: hidden; }
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+.label { color: #FFD700; font-size: 0.95rem; letter-spacing: 0.04em; }
+.clear-btn { border-color: #ff4444; color: #ff4444; background: #2a0000; }
+.clear-btn:hover { background: #ff4444; color: white; }
+.board-container { position: relative; width: 100%; height: calc(100vh - 260px); min-height: 480px; }
+.parchment-bg { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(120,80,20,0.07) 28px, rgba(120,80,20,0.07) 29px), linear-gradient(135deg, #f5e6c8 0%, #ead9a8 15%, #f0dcb0 30%, #e8d09a 50%, #f2d9a6 70%, #e6cc90 85%, #f0d9a8 100%); border-left: 10px solid #7a5010; border-right: 10px solid #7a5010; border-top: 5px solid #7a5010; border-bottom: 5px solid #7a5010; box-shadow: inset 0 0 80px rgba(0,0,0,0.2), inset 0 0 30px rgba(139,94,26,0.2), 0 0 30px rgba(0,0,0,0.7); }
+#drawCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.live-badge { position: fixed; bottom: 18px; right: 18px; background: rgba(0,0,0,0.88); border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1rem; padding: 7px 14px; border-radius: 30px; display: flex; align-items: center; gap: 8px; z-index: 100; letter-spacing: 0.05em; }
+.ws-status { position: fixed; bottom: 18px; left: 18px; background: rgba(0,0,0,0.88); border: 2px solid #555; color: #888; font-family: 'Bangers', cursive; font-size: 0.9rem; padding: 6px 14px; border-radius: 30px; z-index: 100; letter-spacing: 0.05em; transition: all 0.3s; }
+.ws-status.connected { border-color: #4cff72; color: #4cff72; }
+.ws-status.error { border-color: #ff4444; color: #ff4444; }
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: #4cff72; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.6); } }
+.footer-note { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.35); font-size: 0.7rem; padding: 6px; letter-spacing: 0.1em; }
+.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -100%); font-size: 26px; display: none; line-height: 1; }
+.pen-mode #drawCanvas { cursor: none; }
+.eraser-mode #drawCanvas { cursor: none; }
+</style>
+</head>
+<body>
+
+<div class="cursor-custom" id="cursorPen">✏️</div>
+<div class="cursor-custom" id="cursorEraser">🧽</div>
+
+<div class="header">
+  <img src="Ho_Lee_Chit.jpg" alt="Ho Lee Chit" class="logo-img" id="logo" onerror="this.style.display='none'">
+  <div class="title">HO LEE CHIT</div>
+  <div class="subtitle">$CHIT · on Bitcoin · Runes Protocol</div>
+</div>
+
+<div class="toolbar">
+  <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ PENCIL</button>
+  <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 SPONGE</button>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span class="label">SIZE</span>
+    <input type="range" class="size-slider" id="sizeSlider" min="1" max="40" value="4">
+    <span class="label" id="sizeLabel">4</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span class="label">COLOR</span>
+    <input type="color" class="color-picker" id="colorPicker" value="#1a0a00">
+  </div>
+  <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ CLEAR ALL</button>
+</div>
+
+<div class="board-container">
+  <div class="parchment-bg"></div>
+  <canvas id="drawCanvas"></canvas>
+</div>
+
+<div class="footer-note">✦ draw something, ser ✦ everyone sees it live ✦</div>
+<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> online</div>
+<div class="ws-status" id="wsStatus">connecting...</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// Dupa ce deployezi serverul pe Render.com,
+// inlocuieste URL-ul de mai jos cu URL-ul tau de pe Render
+// Exemplu: wss://holeechit-server.onrender.com
+// ════════════════════════════════════════════════════════
+const WS_URL = 'wss://REPLACE-WITH-YOUR-RENDER-URL.onrender.com';
+
+const canvas = document.getElementById('drawCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const c = canvas.parentElement;
+  canvas.width = c.clientWidth;
+  canvas.height = c.clientHeight;
+}
+window.addEventListener('resize', () => { resizeCanvas(); replayStrokes(); });
+resizeCanvas();
+
+let tool = 'pen', drawing = false, lastX = 0, lastY = 0;
+let color = '#1a0a00', size = 4;
+let allStrokes = [], currentPoints = [];
+let ws = null;
+
+function connect() {
+  const status = document.getElementById('wsStatus');
+  status.textContent = 'connecting...'; status.className = 'ws-status';
+  try { ws = new WebSocket(WS_URL); } catch(e) { status.textContent = '⚠ offline'; status.className = 'ws-status error'; return; }
+  ws.onopen = () => { status.textContent = '● live'; status.className = 'ws-status connected'; };
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'init') { allStrokes = msg.strokes || []; replayStrokes(); }
+    if (msg.type === 'stroke') { allStrokes.push(msg.stroke); drawStroke(msg.stroke); }
+    if (msg.type === 'clear') { allStrokes = []; ctx.clearRect(0,0,canvas.width,canvas.height); }
+    if (msg.type === 'presence') { document.getElementById('onlineCount').textContent = msg.count; }
+  };
+  ws.onclose = () => { status.textContent = '⚠ reconnecting...'; status.className = 'ws-status error'; setTimeout(connect, 3000); };
+  ws.onerror = () => { status.textContent = '⚠ offline'; status.className = 'ws-status error'; };
+}
+connect();
+
+function drawStroke(s) {
+  if (!s.points || s.points.length < 2) return;
+  ctx.beginPath();
+  ctx.moveTo(s.points[0].x * canvas.width, s.points[0].y * canvas.height);
+  for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i].x * canvas.width, s.points[i].y * canvas.height);
+  ctx.strokeStyle = s.color; ctx.lineWidth = s.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.globalCompositeOperation = s.eraser ? 'destination-out' : 'source-over';
+  ctx.stroke(); ctx.globalCompositeOperation = 'source-over';
+}
+function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStrokes.forEach(drawStroke); }
+
+const cursorPen = document.getElementById('cursorPen');
+const cursorEraser = document.getElementById('cursorEraser');
+document.addEventListener('mousemove', (e) => {
+  cursorPen.style.left = e.clientX+'px'; cursorPen.style.top = e.clientY+'px';
+  cursorEraser.style.left = e.clientX+'px'; cursorEraser.style.top = e.clientY+'px';
+});
+
+function setTool(t) {
+  tool = t;
+  document.getElementById('penBtn').classList.toggle('active', t==='pen');
+  document.getElementById('eraserBtn').classList.toggle('active', t==='eraser');
+  document.body.classList.toggle('pen-mode', t==='pen');
+  document.body.classList.toggle('eraser-mode', t==='eraser');
+  cursorPen.style.display = t==='pen' ? 'block' : 'none';
+  cursorEraser.style.display = t==='eraser' ? 'block' : 'none';
+}
+setTool('pen');
+
+document.getElementById('sizeSlider').addEventListener('input', (e) => { size=parseInt(e.target.value); document.getElementById('sizeLabel').textContent=size; });
+document.getElementById('colorPicker').addEventListener('input', (e) => { color=e.target.value; });
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX-rect.left)/rect.width, y: (src.clientY-rect.top)/rect.height };
+}
+function drawLive(x1,y1,x2,y2) {
+  ctx.beginPath(); ctx.moveTo(x1*canvas.width, y1*canvas.height); ctx.lineTo(x2*canvas.width, y2*canvas.height);
+  ctx.strokeStyle = tool==='eraser' ? 'rgba(0,0,0,1)' : color;
+  ctx.lineWidth = tool==='eraser' ? size*4 : size;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.globalCompositeOperation = tool==='eraser' ? 'destination-out' : 'source-over';
+  ctx.stroke(); ctx.globalCompositeOperation='source-over';
+}
+canvas.addEventListener('mousedown', (e) => { drawing=true; const p=getPos(e); lastX=p.x; lastY=p.y; currentPoints=[p]; });
+canvas.addEventListener('mousemove', (e) => { if(!drawing) return; const p=getPos(e); drawLive(lastX,lastY,p.x,p.y); currentPoints.push(p); lastX=p.x; lastY=p.y; });
+function endDraw() {
+  if(!drawing) return; drawing=false;
+  if(currentPoints.length<2) return;
+  const stroke = { color: tool==='eraser'?'#fff':color, size: tool==='eraser'?size*4:size, eraser: tool==='eraser', points: currentPoints };
+  allStrokes.push(stroke);
+  if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'stroke',stroke}));
+  currentPoints=[];
+}
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const p=getPos(e); drawing=true; lastX=p.x; lastY=p.y; currentPoints=[p]; }, {passive:false});
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(!drawing) return; const p=getPos(e); drawLive(lastX,lastY,p.x,p.y); currentPoints.push(p); lastX=p.x; lastY=p.y; }, {passive:false});
+canvas.addEventListener('touchend', endDraw);
+
+function clearBoard() {
+  if(!confirm('Ho Lee Chit! Clear the entire board for everyone?')) return;
+  allStrokes=[]; ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'clear'}));
+}
+</script>
+</body>
+</html>
