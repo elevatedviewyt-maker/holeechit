@@ -142,7 +142,9 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 
 .footer-note { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.3); font-size: 0.65rem; padding: 5px; letter-spacing: 0.1em; }
 
-.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -100%); font-size: 24px; display: none; line-height: 1; }
+.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; font-size: 24px; display: none; line-height: 1; }
+#cursorPen { transform: translate(-15%, -85%); }
+#cursorEraser { transform: translate(-40%, -60%); }
 .pen-mode #drawCanvas { cursor: none; }
 .eraser-mode #drawCanvas { cursor: none; }
 </style>
@@ -167,8 +169,8 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 
 <!-- HEADER -->
 <div class="header">
-  <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo" onerror="this.style.display='none'">
-  <div class="title">HO LEE CHIT</div>
+  <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo" onload="document.getElementById('titleText').style.display='none'" onerror="this.style.display='none'">
+  <div class="title" id="titleText">HO LEE CHIT</div>
   <div class="subtitle">$HooLeeChit on Bitcoin</div>
   <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()">JOIN</button>
 </div>
