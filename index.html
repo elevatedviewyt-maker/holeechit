@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HO LEE CHIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursive; overflow-x: hidden; user-select: none; }
+
+/* HEADER */
+.header { text-align: center; padding: 16px 20px 6px; position: relative; }
+.logo-img { width: 110px; height: auto; animation: float 3s ease-in-out infinite; display: block; margin: 0 auto 4px; }
+@keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+.title { font-size: clamp(2.2rem, 6vw, 5rem); color: #FFD700; text-shadow: 4px 4px 0 #7a5500, -2px -2px 0 #7a5500, 2px -2px 0 #7a5500, -2px 2px 0 #7a5500; letter-spacing: 0.05em; line-height: 1; margin-bottom: 2px; }
+.subtitle { font-family: 'Inter', sans-serif; font-weight: 600; font-size: clamp(0.62rem, 1.4vw, 0.85rem); color: #ff6b35; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
+.header-left { position: absolute; top: 24px; left: 24px; display: flex; align-items: center; gap: 10px; }
+.lang-switcher { display: flex; gap: 4px; }
+.lang-btn { background: transparent; border: 2px solid #7a5500; color: #7a5500; font-family: 'Bebas Neue', cursive; font-size: 0.9rem; padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
+.lang-btn:hover { border-color: #FFD700; color: #FFD700; }
+.lang-btn.active { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); }
+.x-link { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #000; border: 2px solid #7a5500; border-radius: 6px; text-decoration: none; transition: all 0.15s; flex-shrink: 0; }
+.x-link:hover { border-color: #FFD700; transform: scale(1.1); }
+.x-link svg { width: 16px; height: 16px; fill: #fff; }
+.join-btn-header { position: absolute; top: 24px; right: 24px; background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; padding: 8px 20px; cursor: pointer; border-radius: 4px; letter-spacing: 0.08em; transition: all 0.15s; }
+.join-btn-header:hover { background: #FFD700; color: #1a0a00; }
+.join-btn-header.joined { border-color: #4cff72; color: #4cff72; font-size: 0.85rem; padding: 6px 14px; }
+.join-btn-header.joined:hover { background: #4cff72; color: #1a0a00; }
+
+/* TOOLBAR — sits above the board only, hidden globally */
+.toolbar { display: none; justify-content: center; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(0,0,0,0.75); border: 2px solid #FFD700; border-radius: 6px 6px 0 0; flex-wrap: wrap; }
+.board-outer .toolbar { display: flex; }
+.tool-btn { background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 1rem; padding: 6px 14px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 6px; transition: all 0.12s; letter-spacing: 0.05em; }
+.tool-btn:hover, .tool-btn.active { background: #FFD700; color: #1a0a00; }
+.tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.size-slider { -webkit-appearance: none; width: 85px; height: 5px; border-radius: 3px; background: #FFD700; outline: none; cursor: pointer; }
+.size-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #FFD700; border: 3px solid #1a0a00; cursor: pointer; }
+.color-picker { width: 34px; height: 34px; border: 3px solid #FFD700; border-radius: 50%; cursor: pointer; background: none; padding: 0; overflow: hidden; }
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+.label { color: #FFD700; font-size: 0.9rem; letter-spacing: 0.04em; }
+.clear-btn { border-color: #ff4444; color: #ff4444; background: #2a0000; }
+.clear-btn:hover { background: #ff4444; color: white; }
+
+/* MAIN LAYOUT */
+:root { --panel-h: calc(100vh - 220px); }
+.board-chat-wrap { display: flex; align-items: flex-start; padding: 8px 12px; gap: 10px; background: #1a0a00; width: 100%; box-sizing: border-box; }
+.board-outer { flex-shrink: 0; position: relative; display: flex; flex-direction: column; height: var(--panel-h); width: var(--panel-h); max-width: 46%; }
+.board-container { position: relative; width: 100%; flex: 1; border-radius: 0 0 6px 6px; overflow: hidden; }
+
+/* Parchment */
+.parchment-bg {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,60,10,0.09) 27px, rgba(100,60,10,0.09) 28px),
+    repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(100,60,10,0.04) 27px, rgba(100,60,10,0.04) 28px),
+    radial-gradient(ellipse at 10% 10%, #e8d08a 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 85%, #d4b86a 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, #f0d9a0 0%, #e0c070 100%);
+  border: 10px solid #8B5E1A;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.18), 0 8px 40px rgba(0,0,0,0.7);
+}
+.parchment-bg::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 0% 0%, rgba(139,94,26,0.35) 0%, transparent 25%), radial-gradient(ellipse at 100% 0%, rgba(100,60,0,0.3) 0%, transparent 22%), radial-gradient(ellipse at 0% 100%, rgba(100,60,0,0.3) 0%, transparent 22%), radial-gradient(ellipse at 100% 100%, rgba(139,94,26,0.35) 0%, transparent 25%);
+  pointer-events: none;
+}
+#drawCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; z-index: 2; }
+
+/* RIGHT COLUMN — desktop: board | chat | voice+music side by side */
+.right-col { display: flex; flex-direction: row; gap: 10px; flex: 1; min-width: 0; height: var(--panel-h); align-items: stretch; }
+.chat-col { display: flex; flex-direction: column; flex: 1; min-width: 0; height: 100%; }
+.side-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; height: 100%; }
+
+/* CHAT */
+.chat-panel { flex: 1; min-height: 0; height: 100%; background: rgba(0,0,0,0.6); border: 2px solid #7a5500; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
+.chat-header { background: #2a1500; border-bottom: 2px solid #7a5500; padding: 8px 12px; font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em; text-align: center; flex-shrink: 0; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: #7a5500; border-radius: 2px; }
+.chat-msg { font-family: 'Inter', sans-serif; font-size: 0.72rem; line-height: 1.5; word-break: break-word; }
+.chat-msg .chat-name { color: #FFD700; font-weight: 600; font-size: 0.72rem; display: block; margin-bottom: 1px; }
+.chat-msg .chat-text { color: rgba(255,235,180,0.85); }
+.chat-msg .chat-time { color: rgba(255,215,0,0.25); font-size: 0.55rem; float: right; margin-top: 2px; }
+.chat-input-wrap { display: flex; border-top: 2px solid #7a5500; flex-shrink: 0; }
+.chat-input { flex: 1; background: #1a0a00; border: none; outline: none; color: #FFD700; font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 8px 10px; }
+.chat-input::placeholder { color: rgba(255,215,0,0.3); }
+.chat-send { background: #2a1500; border: none; border-left: 2px solid #7a5500; color: #FFD700; font-size: 1rem; padding: 0 10px; cursor: pointer; transition: background 0.12s; }
+.chat-send:hover { background: #FFD700; color: #1a0a00; }
+.chat-locked { text-align: center; padding: 12px 8px; font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.35); font-size: 0.65rem; line-height: 1.6; }
+
+/* MUSIC PANEL */
+.music-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: rgba(0,0,0,0.7); border: 2px solid #7a5500; border-radius: 6px; overflow: hidden; }
+.music-scroll-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; }
+.music-scroll-body::-webkit-scrollbar { width: 4px; }
+.music-scroll-body::-webkit-scrollbar-thumb { background: #7a5500; border-radius: 2px; }
+.music-header { background: #1a0800; border-bottom: 2px solid #7a5500; padding: 7px 12px; font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em; text-align: center; }
+.now-playing { padding: 8px 12px; border-bottom: 1px solid #3a2000; }
+.now-playing-label { font-family: 'Inter', sans-serif; font-size: 0.55rem; color: rgba(255,215,0,0.4); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+.now-playing-title { font-family: 'Inter', sans-serif; font-weight: 600; color: #FFD700; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+.eq-bars-wrap { display: none; flex-shrink: 0; align-items: flex-end; gap: 2px; height: 12px; }
+.eq-bar { width: 3px; background: #4cff72; border-radius: 1px; animation: eq 0.8s ease-in-out infinite; }
+.eq-bar:nth-child(1){height:4px;animation-delay:0s}.eq-bar:nth-child(2){height:8px;animation-delay:.15s}.eq-bar:nth-child(3){height:6px;animation-delay:.3s}.eq-bar:nth-child(4){height:10px;animation-delay:.1s}
+@keyframes eq { 0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)} }
+.eq-bars-wrap.playing { display: flex; }
+.queue-section { padding: 10px 12px; }
+.queue-info { font-family: 'Inter', sans-serif; font-size: 0.62rem; color: rgba(255,215,0,0.4); line-height: 1.6; margin-bottom: 8px; }
+.queue-list { display: flex; flex-direction: column; gap: 4px; max-height: 130px; overflow-y: auto; margin-bottom: 8px; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; }
+.queue-item { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: rgba(255,215,0,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 3px 6px; border-left: 2px solid #7a5500; }
+.queue-item.mine { border-color: #FFD700; color: #FFD700; }
+.queue-add { display: flex; gap: 6px; }
+.queue-input { flex: 1; background: #1a0a00; border: 2px solid #7a5500; color: #FFD700; font-family: 'Inter', sans-serif; font-size: 0.65rem; padding: 6px 8px; border-radius: 4px; outline: none; min-width: 0; }
+.queue-input::placeholder { color: rgba(255,215,0,0.25); }
+.queue-input:focus { border-color: #FFD700; }
+.queue-btn { background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 0.9rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: all 0.12s; letter-spacing: 0.05em; }
+.queue-btn:hover { background: #FFD700; color: #1a0a00; }
+.queue-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.queue-msg { font-family: 'Inter', sans-serif; font-size: 0.6rem; color: #ff4444; margin-top: 5px; min-height: 14px; }
+.queue-msg.ok { color: #4cff72; }
+
+
+/* VOICE PANEL */
+.voice-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: rgba(0,0,0,0.7); border: 2px solid #7a5500; border-radius: 6px; overflow: hidden; }
+.voice-scroll-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
+.voice-scroll-body::-webkit-scrollbar { width: 4px; }
+.voice-scroll-body::-webkit-scrollbar-thumb { background: #7a5500; border-radius: 2px; }
+.voice-header { background: #1a0800; border-bottom: 2px solid #7a5500; padding: 7px 12px; font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.voice-body { display: flex; flex-direction: column; height: 100%; }
+.voice-controls { display: flex; gap: 6px; }
+.voice-join-btn { flex: 1; background: #2a1500; border: 2px solid #4cff72; color: #4cff72; font-family: 'Bebas Neue', cursive; font-size: 1rem; padding: 7px 10px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.15s; }
+.voice-join-btn:hover { background: #4cff72; color: #1a0a00; }
+.voice-join-btn.in-room { border-color: #ff4444; color: #ff4444; }
+.voice-join-btn.in-room:hover { background: #ff4444; color: white; }
+.voice-mute-btn { background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 0.9rem; padding: 7px 10px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; transition: all 0.15s; white-space: nowrap; }
+.voice-mute-btn:hover { background: #FFD700; color: #1a0a00; }
+.voice-mute-btn.muted { border-color: #ff4444; color: #ff4444; }
+.voice-mute-btn.muted:hover { background: #ff4444; color: white; }
+.voice-participants { display: flex; flex-wrap: wrap; gap: 5px; min-height: 24px; }
+.voice-participant { font-family: 'Inter', sans-serif; font-size: 0.62rem; background: rgba(255,215,0,0.08); border: 1px solid #7a5500; border-radius: 20px; padding: 3px 9px; color: rgba(255,215,0,0.7); display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+.voice-participant.speaking { border-color: #4cff72; color: #4cff72; background: rgba(76,255,114,0.08); }
+.voice-participant.muted-mic { opacity: 0.5; }
+.voice-participant .vp-icon { font-size: 0.7rem; }
+.voice-status { font-family: 'Inter', sans-serif; font-size: 0.6rem; color: rgba(255,215,0,0.35); text-align: center; min-height: 14px; }
+.voice-status.err { color: #ff4444; }
+
+/* FULL-PAGE JOIN OVERLAY */
+.join-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,4,0,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; }
+.join-overlay.hidden { display: none; }
+.join-box { background: #1a0a00; border: 3px solid #FFD700; border-radius: 12px; padding: 40px 44px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 80px rgba(255,215,0,0.18); }
+.join-box h2 { color: #FFD700; font-size: 2.4rem; margin-bottom: 4px; letter-spacing: 0.05em; }
+.join-box p { font-family: 'Inter', sans-serif; color: #ff6b35; font-size: 0.82rem; margin-bottom: 24px; letter-spacing: 0.06em; }
+.join-input { width: 100%; background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Inter', sans-serif; font-size: 0.95rem; padding: 11px 14px; border-radius: 6px; margin-bottom: 12px; outline: none; }
+.join-input::placeholder { color: rgba(255,215,0,0.35); }
+.join-input:focus { border-color: #ff6b35; }
+.join-input.input-error { border-color: #ff4444; }
+.join-submit { width: 100%; background: #FFD700; border: none; color: #1a0a00; font-family: 'Bebas Neue', cursive; font-size: 1.4rem; padding: 12px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.12s; margin-top: 4px; }
+.join-submit:hover { background: #ff6b35; color: white; }
+.join-error { color: #ff4444; font-family: 'Inter', sans-serif; font-size: 0.78rem; margin-top: 8px; display: none; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-overlay.hidden { display: none; }
+.modal-box { background: #1a0a00; border: 3px solid #FFD700; border-radius: 8px; padding: 28px 32px; text-align: center; max-width: 360px; width: 90%; box-shadow: 0 0 60px rgba(255,215,0,0.15); }
+.modal-box h2 { color: #FFD700; font-size: 1.8rem; margin-bottom: 16px; }
+.modal-edit-field { width: 100%; background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 9px 12px; border-radius: 4px; margin-bottom: 10px; outline: none; }
+.modal-edit-field:focus { border-color: #ff6b35; }
+.modal-edit-field.input-error { border-color: #ff4444; }
+.modal-err { color: #ff4444; font-family: 'Inter', sans-serif; font-size: 0.72rem; margin-bottom: 10px; display: none; text-align: left; }
+.modal-btns { display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+.modal-close { background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+.modal-close:hover { background: #FFD700; color: #1a0a00; }
+.modal-save { background: #FFD700; border: 2px solid #FFD700; color: #1a0a00; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+.modal-save:hover { background: #ff6b35; border-color: #ff6b35; color: white; }
+.modal-logout { background: transparent; border: 2px solid #ff4444; color: #ff4444; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+.modal-logout:hover { background: #ff4444; color: white; }
+
+/* STATUS */
+.live-badge { position: fixed; bottom: 16px; right: 16px; background: rgba(0,0,0,0.88); border: 2px solid #FFD700; color: #FFD700; font-family: 'Bebas Neue', cursive; font-size: 0.95rem; padding: 6px 13px; border-radius: 30px; display: flex; align-items: center; gap: 7px; z-index: 100; letter-spacing: 0.05em; }
+.ws-status { position: fixed; bottom: 16px; left: 16px; background: rgba(0,0,0,0.88); border: 2px solid #555; color: #888; font-family: 'Bebas Neue', cursive; font-size: 0.85rem; padding: 5px 13px; border-radius: 30px; z-index: 100; letter-spacing: 0.05em; transition: all 0.3s; }
+.ws-status.connected { border-color: #4cff72; color: #4cff72; }
+.ws-status.error { border-color: #ff4444; color: #ff4444; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4cff72; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.6)} }
+
+/* CURSOR - hide default everywhere on desktop */
+@media (hover: hover) {
+  * { cursor: none !important; }
+}
+body.on-board #drawCanvas { cursor: none !important; }
+
+/* Mobile music tap button */
+.music-tap-btn { display: none; width: 100%; background: #FFD700; border: none; color: #1a0a00; font-family: "Bebas Neue", cursive; font-size: 1.1rem; padding: 10px; letter-spacing: 0.08em; cursor: pointer; }
+@media (max-width: 768px) { .music-tap-btn { display: block; } }
+
+/* FOOTER */
+.footer-section { background: #0e0500; border-top: 2px solid #3a2000; padding: 28px 24px 16px; }
+.footer-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; max-width: 960px; margin: 0 auto 20px; }
+.footer-block { text-align: center; max-width: 260px; }
+.footer-icon { font-size: 2rem; margin-bottom: 8px; }
+.footer-block-title { font-family: 'Bebas Neue', cursive; color: #FFD700; font-size: 1.15rem; letter-spacing: 0.1em; margin-bottom: 10px; }
+.footer-rule { font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.55); font-size: 0.7rem; line-height: 1.8; letter-spacing: 0.02em; text-align: left; }
+.footer-rule li { margin-bottom: 4px; padding-left: 4px; }
+.footer-bottom { text-align: center; font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.3); font-size: 0.6rem; padding-top: 14px; letter-spacing: 0.08em; border-top: 1px solid #2a1000; margin-top: 4px; }
+
+/* MOBILE TABS */
+.mobile-tabs { display: none; border-bottom: 2px solid #FFD700; }
+.mobile-tab { flex: 1; text-align: center; padding: 10px; font-family: 'Bebas Neue', cursive; font-size: 1rem; color: #7a5500; cursor: pointer; letter-spacing: 0.08em; background: #1a0a00; border: none; transition: all 0.15s; }
+.mobile-tab.active { color: #FFD700; background: #2a1500; }
+
+/* MUSIC SOURCE TABS */
+.music-source-tabs { display: flex; border-bottom: 2px solid #7a5500; }
+.music-src-btn { flex: 1; background: #1a0800; border: none; border-right: 1px solid #7a5500; color: #7a5500; font-family: 'Bebas Neue', cursive; font-size: 0.95rem; padding: 7px 10px; cursor: pointer; letter-spacing: 0.07em; transition: all 0.15s; }
+.music-src-btn:last-child { border-right: none; }
+.music-src-btn:hover { color: #FFD700; background: #2a1200; }
+.music-src-btn.active { background: #2a1500; color: #FFD700; border-bottom: 2px solid #FFD700; margin-bottom: -2px; }
+
+/* Hidden YT player */
+#ytPlayer { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; }
+
+/* MUTE BUTTON */
+#muteBtn { transition: all 0.15s; }
+#muteBtn:hover { color: #FFD700 !important; border-color: #FFD700 !important; }
+#muteBtn.muted { border-color: #ff4444 !important; color: #ff4444 !important; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .mobile-tabs { display: flex; }
+  .board-chat-wrap { flex-direction: column; padding: 0; gap: 0; }
+  .board-outer { width: 100vw; height: auto !important; max-width: 100vw !important; }
+  .board-outer.tab-hidden { display: none; }
+  .board-container { aspect-ratio: unset !important; height: 100vw !important; width: 100vw; min-height: unset; border-radius: 0; flex: unset !important; }
+  .board-outer .toolbar { display: flex; border-radius: 0; border-left: none; border-right: none; border-top: none; width: 100%; flex-wrap: wrap; }
+
+  /* right-col on mobile = single panel at a time, stacked */
+  .right-col { flex-direction: column; height: auto; min-height: unset; padding: 0; gap: 0; }
+  .right-col.tab-hidden { display: none; }
+  .chat-col { height: 100vw; width: 100%; flex: unset; min-width: unset; }
+  .side-col { width: 100%; height: auto; flex-direction: column; gap: 0; }
+
+  /* All panels: same fixed square size, internal scroll */
+  .chat-panel { width: 100vw; height: 100vw; min-height: unset; max-height: 100vw; border-radius: 0; border-left: none; border-right: none; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .chat-messages { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #chatInputArea { flex-shrink: 0; }
+
+  /* Voice panel: same square size as chat */
+  .voice-panel { width: 100vw; height: 100vw; min-height: unset; border-radius: 0; border-left: none; border-right: none; flex-shrink: 0; flex: unset; }
+  .voice-body { height: calc(100vw - 38px); }
+  .voice-scroll-body { padding: 12px; }
+
+  /* Music panel: same square size as chat */
+  .music-panel { width: 100vw; height: 100vw; min-height: unset; border-radius: 0; border-left: none; border-right: none; flex-shrink: 0; flex: unset; }
+  .music-scroll-body { height: calc(100vw - 80px); }
+
+  .header-left { top: 10px; left: 6px; gap: 3px; }
+  .join-btn-header { top: 10px; right: 6px; font-size: 0.85rem; padding: 5px 10px; }
+  .lang-btn { font-size: 0.7rem; padding: 2px 7px; }
+  .toolbar { gap: 6px; padding: 6px 8px; }
+  .tool-btn { font-size: 0.8rem; padding: 4px 8px; }
+  .join-box { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="ytPlayer"></div>
+<!-- Cursors -->
+<!-- Chopstick cursor (shown outside board) -->
+<svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible;top:0;left:0;width:100vw;height:100vh">
+  <!-- left chopstick -->
+  <line id="chop1" stroke="#c8941a" stroke-width="3" stroke-linecap="round"/>
+  <!-- right chopstick -->
+  <line id="chop2" stroke="#8B5E1A" stroke-width="3" stroke-linecap="round"/>
+  <!-- sushi piece at tip -->
+  <g id="sushiG">
+    <ellipse id="sushiRice" rx="7" ry="5" fill="#f5f0e8" stroke="#ddd" stroke-width="0.5"/>
+    <ellipse id="sushiNori" rx="5" ry="1.5" fill="#1a1a1a" transform="translate(0,0)"/>
+    <ellipse id="sushiFish" rx="3.5" ry="2" fill="#ff6b6b" transform="translate(0,0)"/>
+  </g>
+</svg>
+<!-- Pen cursor (shown on board in pen mode) -->
+<div id="penCursor" style="position:fixed;pointer-events:none;z-index:9999;display:none;font-size:22px;transform:translate(-10%,-88%)">✏️</div>
+<!-- Eraser cursor (shown on board in eraser mode) -->
+<div id="eraserCursor" style="position:fixed;pointer-events:none;z-index:9999;display:none;font-size:22px;transform:translate(-30%,-70%)">🧽</div>
+
+<!-- FULL-PAGE JOIN OVERLAY -->
+<div class="join-overlay" id="joinOverlay">
+  <div class="join-box">
+    <h2>JOIN THE BOARD</h2>
+    <p>enter your details to draw & chat, ser</p>
+    <input class="join-input" id="inputName" type="text" placeholder="Your name / nickname" maxlength="32">
+    <input class="join-input" id="inputBtc" type="text" placeholder="Bitcoin address (bc1...) — optional" maxlength="90">
+    <button class="join-submit" onclick="submitJoin()">LET ME IN 🖊️</button>
+    <div class="join-error" id="joinError">Please enter at least your name!</div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay hidden" id="profileModal">
+  <div class="modal-box">
+    <h2>YOUR PROFILE</h2>
+    <input class="modal-edit-field" id="editName" type="text" maxlength="32" placeholder="Name / nickname">
+    <input class="modal-edit-field" id="editBtc" type="text" maxlength="90" placeholder="Bitcoin address (bc1...)">
+    <div class="modal-err" id="editErr"></div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveProfile()">SAVE</button>
+      <button class="modal-close" onclick="closeModal()">CLOSE</button>
+      <button class="modal-logout" onclick="logout()">LOGOUT</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="logo.jpg" alt="Ho Lee Chit" class="logo-img" id="logo"
+    onload="document.getElementById('titleText').style.display='none'"
+    onerror="this.style.display='none'">
+  <div class="title" id="titleText">HO LEE CHIT</div>
+  <div class="subtitle">$HOLEECHIT RUNE — SOON ON BOUND EXCHANGE</div>
+  <div class="header-left">
+    <a class="x-link" href="https://x.com/holeechitrune" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+  <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()">JOIN</button>
+</div>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mobile-tab active" id="tabDraw" onclick="switchTab('draw')">✏️ DRAW</button>
+  <button class="mobile-tab" id="tabChat" onclick="switchTab('chat')">💬 CHAT</button>
+  <button class="mobile-tab" id="tabMusic" onclick="switchTab('music')">🎵 MUSIC</button>
+  <button class="mobile-tab" id="tabVoice" onclick="switchTab('voice')">🎙️ VOICE</button>
+</div>
+
+<!-- BOARD + RIGHT COLUMN -->
+<div class="board-chat-wrap">
+  <div class="board-outer" id="boardOuter">
+    <div class="toolbar">
+      <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ PENCIL</button>
+      <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 SPONGE</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="label">SIZE</span>
+        <input type="range" class="size-slider" id="sizeSlider" min="1" max="40" value="4">
+        <span class="label" id="sizeLabel">4</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="label">COLOR</span>
+        <input type="color" class="color-picker" id="colorPicker" value="#1a0a00">
+      </div>
+      <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ CLEAR ALL</button>
+    </div>
+    <div class="board-container">
+      <div class="parchment-bg"></div>
+      <canvas id="drawCanvas"></canvas>
+    </div>
+  </div>
+
+  <div class="right-col" id="rightCol">
+    <!-- CHAT COLUMN -->
+    <div class="chat-col" id="chatCol">
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-header">💬 LIVE CHAT</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div id="chatInputArea">
+        <div class="chat-locked" id="chatLocked">Join to chat</div>
+        <div class="chat-input-wrap" id="chatInputWrap" style="display:none">
+          <input class="chat-input" id="chatInput" type="text" maxlength="300" placeholder="say something...">
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+    </div><!-- /chat-col -->
+
+    <!-- SIDE COLUMN: voice top, music bottom -->
+    <div class="side-col" id="sideCol">
+    <!-- VOICE -->
+    <div class="voice-panel" id="voicePanel">
+      <div class="voice-header">
+        <span>🎙️ VOICE CHAT</span>
+      </div>
+      <div class="voice-body">
+        <div class="voice-scroll-body">
+          <div class="voice-controls">
+            <button class="voice-join-btn" id="voiceJoinBtn" onclick="toggleVoice()">JOIN VOICE</button>
+            <button class="voice-mute-btn" id="voiceMuteBtn" onclick="toggleVoiceMic()" style="display:none">🎤 MIC ON</button>
+          </div>
+          <div class="voice-participants" id="voiceParticipants"></div>
+          <div class="voice-status" id="voiceStatus">join to talk with others</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUSIC -->
+    <div class="music-panel" id="musicPanel">
+      <div class="music-header" style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;">
+        <span>🎵 MUSIC QUEUE</span>
+        <button id="muteBtn" onclick="toggleMute()" style="background:transparent;border:1px solid #7a5500;color:#7a5500;font-family:'Bebas Neue',cursive;font-size:0.75rem;padding:3px 8px;border-radius:4px;cursor:pointer;letter-spacing:0.05em;">🔊 SOUND</button>
+      </div>
+      <button class="music-tap-btn" id="musicTapBtn" onclick="startMusicMobile()">▶ TAP TO START MUSIC</button>
+      <div class="music-scroll-body">
+      <!-- Source tabs -->
+      <div class="music-source-tabs">
+        <button class="music-src-btn active" id="srcYT" onclick="switchMusicSource('yt')">▶ YouTube</button>
+        <button class="music-src-btn" id="srcNete" onclick="switchMusicSource('nete')">🎵 网易云音乐</button>
+      </div>
+
+      <div class="now-playing">
+        <div class="now-playing-label">NOW PLAYING</div>
+        <div class="now-playing-title">
+          <span id="npText">— radio —</span>
+          <span class="eq-bars-wrap" id="eqBars">
+            <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- YouTube queue section -->
+      <div class="queue-section" id="queueSectionYT">
+        <div class="queue-info" id="queueInfoYT">🎵 Paste a YouTube link below to add your song to the queue. Max 8 min per song. One song at a time — once yours plays, you can add another.</div>
+        <div class="queue-list" id="queueListYT"></div>
+        <div class="queue-add">
+          <input class="queue-input" id="queueInput" type="text" placeholder="youtube.com/watch?v=...">
+          <button class="queue-btn" id="queueAddBtn" onclick="addToQueue()">ADD</button>
+        </div>
+        <div class="queue-msg" id="queueMsg"></div>
+      </div>
+
+      <!-- NetEase queue section -->
+      <div class="queue-section" id="queueSectionNete" style="display:none">
+        <div class="queue-info" id="queueInfoNete">🎵 粘贴网易云音乐链接添加歌曲。每次只能加一首——你的歌播完后可以再加。<br><span style="opacity:0.6;font-size:0.58rem">格式：music.163.com/song?id=XXXXXXX</span></div>
+        <div class="queue-list" id="queueListNete"></div>
+        <div class="queue-add">
+          <input class="queue-input" id="neteInput" type="text" placeholder="music.163.com/song?id=...">
+          <button class="queue-btn" id="neteAddBtn" onclick="addToNeteQueue()">ADD</button>
+        </div>
+        <div class="queue-msg" id="neteMsg"></div>
+      </div>
+
+      </div><!-- /music-scroll-body -->
+      <!-- NetEase iframe player (hidden when inactive) -->
+      <div id="netePlayerWrap" style="display:none;position:fixed;bottom:0;right:0;width:2px;height:2px;overflow:hidden;z-index:1;opacity:0.01;">
+        <iframe id="netePlayer" src="" frameborder="no" border="0" marginwidth="0" marginheight="0"
+          width="2" height="2" allowfullscreen="true"></iframe>
+      </div>
+    </div>
+    </div><!-- /side-col -->
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-section">
+  <div class="footer-grid">
+    <div class="footer-block">
+      <div class="footer-icon">🎨</div>
+      <div class="footer-block-title">BOARD RULES</div>
+      <ul class="footer-rule">
+        <li>Draw anything — it's visible to everyone live</li>
+        <li>No hate symbols, slurs, or explicit content</li>
+        <li>Clear All resets the board for everyone</li>
+        <li>Strokes are saved — board persists across sessions</li>
+      </ul>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">💬</div>
+      <div class="footer-block-title">CHAT RULES</div>
+      <ul class="footer-rule">
+        <li>Be respectful — no harassment or spam</li>
+        <li>Chat history is permanent and stored</li>
+        <li>Your name must be unique — pick something fun</li>
+        <li>No impersonation of other users</li>
+      </ul>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">🎵</div>
+      <div class="footer-block-title">MUSIC RULES</div>
+      <ul class="footer-rule">
+        <li>YouTube or NetEase — two independent queues</li>
+        <li>YouTube: max 8 minutes per song</li>
+        <li>One song per user per queue at a time</li>
+        <li>Radio plays automatically when queue is empty</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 HO LEE CHIT — This is a parody account and should be taken as such. No offence intended.</div>
+</div>
+
+
+<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> online</div>
+<div class="ws-status" id="wsStatus">connecting...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+<script>
+const WS_URL = 'wss://holeechit-server.onrender.com';
+const RADIO_ID = 'X4VbdwhkE10';
+
+let currentUser = null;
+let ws = null;
+
+// ── User session ──────────────────────────────────────────
+function loadUser() {
+  try { const s = localStorage.getItem('hlc_user'); if (s) currentUser = JSON.parse(s); } catch(e) { currentUser = null; }
+}
+function saveUserLocal(name, btc) { currentUser = { name, btc }; localStorage.setItem('hlc_user', JSON.stringify(currentUser)); }
+function logout() { localStorage.removeItem('hlc_user'); currentUser = null; closeModal(); updateUI(); }
+
+function updateUI() {
+  const joinBtn = document.getElementById('joinBtn');
+  const overlay = document.getElementById('joinOverlay');
+  const chatLocked = document.getElementById('chatLocked');
+  const chatInputWrap = document.getElementById('chatInputWrap');
+  if (currentUser) {
+    joinBtn.textContent = '👤 ' + currentUser.name;
+    joinBtn.classList.add('joined');
+    overlay.classList.add('hidden');
+    chatLocked.style.display = 'none';
+    chatInputWrap.style.display = 'flex';
+  } else {
+    joinBtn.textContent = 'JOIN';
+    joinBtn.classList.remove('joined');
+    overlay.classList.remove('hidden');
+    chatLocked.style.display = 'block';
+    chatInputWrap.style.display = 'none';
+  }
+  updateQueueBtn();
+}
+
+function onJoinClick() {
+  if (currentUser) {
+    document.getElementById('editName').value = currentUser.name;
+    document.getElementById('editBtc').value = currentUser.btc || '';
+    document.getElementById('editErr').style.display = 'none';
+    document.getElementById('profileModal').classList.remove('hidden');
+  }
+}
+function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
+document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target===this) closeModal(); });
+
+function saveProfile() {
+  const newName = document.getElementById('editName').value.trim();
+  const newBtc  = document.getElementById('editBtc').value.trim();
+  const oldName = currentUser?.name || '';
+  if (!newName) { document.getElementById('editErr').textContent='Name required'; document.getElementById('editErr').style.display='block'; return; }
+  if (ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type:'update_user', oldName, newName, newBtc }));
+}
+
+function submitJoin() {
+  const name = document.getElementById('inputName').value.trim();
+  const btc  = document.getElementById('inputBtc').value.trim();
+  const err  = document.getElementById('joinError');
+  err.style.display = 'none';
+  document.getElementById('inputName').classList.remove('input-error');
+  if (!name) { err.textContent='Please enter at least your name!'; err.style.display='block'; return; }
+  if (ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type:'register', name, btc }));
+}
+
+// ── Chat ──────────────────────────────────────────────────
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  if (ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type:'chat', name:currentUser.name, text }));
+  input.value = '';
+}
+function appendChatMsg(msg) {
+  const box = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'chat-msg';
+  const t = new Date(msg.ts);
+  const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+  d.innerHTML = `<span class="chat-name">${esc(msg.name)}</span><span class="chat-text">${esc(msg.text)}</span><span class="chat-time">${ts}</span>`;
+  box.appendChild(d);
+  while (box.children.length > 100) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── WebSocket ─────────────────────────────────────────────
+function connect() {
+  const status = document.getElementById('wsStatus');
+  status.textContent='connecting...'; status.className='ws-status';
+  try { ws = new WebSocket(WS_URL); } catch(e) { status.textContent='⚠ offline'; status.className='ws-status error'; return; }
+  ws.onopen = () => { status.textContent='● live'; status.className='ws-status connected'; };
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type==='init') { allStrokes=msg.strokes||[]; replayStrokes(); }
+    if (msg.type==='stroke') { allStrokes.push(msg.stroke); drawStroke(msg.stroke); }
+    if (msg.type==='clear') { allStrokes=[]; ctx.clearRect(0,0,canvas.width,canvas.height); }
+    if (msg.type==='presence') { document.getElementById('onlineCount').textContent=msg.count; }
+    if (msg.type==='chat_init') { document.getElementById('chatMessages').innerHTML=''; (msg.messages||[]).forEach(appendChatMsg); }
+    if (msg.type==='chat') { appendChatMsg(msg.msg); }
+    if (msg.type==='register_ok') { saveUserLocal(msg.name,msg.btc); updateUI(); }
+    if (msg.type==='register_err') {
+      const err=document.getElementById('joinError');
+      err.textContent=msg.msg; err.style.display='block';
+      if (msg.field==='name') document.getElementById('inputName').classList.add('input-error');
+    }
+    if (msg.type==='update_ok') { saveUserLocal(msg.name,msg.btc); updateUI(); closeModal(); }
+    if (msg.type==='update_err') {
+      const err=document.getElementById('editErr');
+      err.textContent=msg.msg; err.style.display='block';
+      if (msg.field==='name') document.getElementById('editName').classList.add('input-error');
+    }
+    if (msg.type==='queue_update') { handleQueueUpdate(msg); }
+    if (msg.type==='queue_err') { const m=document.getElementById(msg.source==='nete'?'neteMsg':'queueMsg'); m.textContent=msg.msg; m.className='queue-msg'; }
+    if (msg.type==='clear_err') { alert(msg.msg); }
+  };
+  ws.onclose = () => { status.textContent='⚠ reconnecting...'; status.className='ws-status error'; setTimeout(connect,3000); };
+  ws.onerror = () => { status.textContent='⚠ offline'; status.className='ws-status error'; };
+}
+
+// ── Canvas ────────────────────────────────────────────────
+const canvas = document.getElementById('drawCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { const c=canvas.parentElement; const s=c.clientWidth; canvas.width=s; canvas.height=s; }
+window.addEventListener('resize', () => { resizeCanvas(); replayStrokes(); });
+resizeCanvas();
+
+let tool='pen', drawing=false, lastX=0, lastY=0, color='#1a0a00', size=4;
+let allStrokes=[], currentPoints=[];
+
+function drawStroke(s) {
+  if (!s.points||s.points.length<2) return;
+  ctx.beginPath();
+  ctx.moveTo(s.points[0].x*canvas.width, s.points[0].y*canvas.height);
+  for (let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x*canvas.width, s.points[i].y*canvas.height);
+  ctx.strokeStyle=s.color; ctx.lineWidth=s.size; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.globalCompositeOperation=s.eraser?'destination-out':'source-over';
+  ctx.stroke(); ctx.globalCompositeOperation='source-over';
+}
+function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStrokes.forEach(drawStroke); }
+
+const isTouchDevice=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
+
+// ── Chopstick + sushi cursor ──────────────────────────────
+const chopSvg     = document.getElementById('chopSvg');
+const chop1       = document.getElementById('chop1');
+const chop2       = document.getElementById('chop2');
+const sushiG      = document.getElementById('sushiG');
+const sushiRice   = document.getElementById('sushiRice');
+const sushiNori   = document.getElementById('sushiNori');
+const sushiFish   = document.getElementById('sushiFish');
+const penCursor   = document.getElementById('penCursor');
+const eraserCursor= document.getElementById('eraserCursor');
+
+let onBoard = false;
+let mx = 0, my = 0;
+let isMouseDown = false;
+
+// Sushi = pointer (at x,y)
+// Chopsticks come from the RIGHT: back ends are fully joined (touching), tips open above/below sushi.
+// On click, tips close and press against top/bottom of sushi.
+function drawChopsticks(x, y, clicking) {
+  const sw = 5, sh = 3.5;
+  // Draw sushi at cursor position
+  sushiRice.setAttribute('cx', x); sushiRice.setAttribute('cy', y);
+  sushiRice.setAttribute('rx', sw); sushiRice.setAttribute('ry', sh);
+  sushiNori.setAttribute('transform', `translate(${x},${y - 1.5})`);
+  sushiNori.setAttribute('rx', sw); sushiNori.setAttribute('ry', 1.5);
+  sushiFish.setAttribute('transform', `translate(${x},${y - 2.5})`);
+  sushiFish.setAttribute('rx', sw - 1.5); sushiFish.setAttribute('ry', 2);
+
+  const stickLen = 44;
+  // Back ends: completely joined at one point far right
+  const backX = x + stickLen + 20;
+  const backSpread = 0;
+  // Tips land at the CENTER of sushi (x), so they visually grip it
+  const tipX = x;
+  const tipSpread = clicking ? sh : sh + 7;
+
+  chop1.setAttribute('x1', backX); chop1.setAttribute('y1', y);
+  chop1.setAttribute('x2', tipX);  chop1.setAttribute('y2', y - tipSpread);
+  chop2.setAttribute('x1', backX); chop2.setAttribute('y1', y);
+  chop2.setAttribute('x2', tipX);  chop2.setAttribute('y2', y + tipSpread);
+}
+
+if (!isTouchDevice) {
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    if (onBoard) {
+      // show pen or eraser cursor
+      if (tool === 'pen') {
+        penCursor.style.left = mx + 'px'; penCursor.style.top = my + 'px';
+      } else {
+        eraserCursor.style.left = mx + 'px'; eraserCursor.style.top = my + 'px';
+      }
+    } else {
+      drawChopsticks(mx, my, isMouseDown);
+    }
+  });
+  document.addEventListener('mousedown', (e) => {
+    isMouseDown = true;
+    if (!onBoard) drawChopsticks(e.clientX, e.clientY, true);
+  });
+  document.addEventListener('mouseup', (e) => {
+    isMouseDown = false;
+    if (!onBoard) drawChopsticks(e.clientX, e.clientY, false);
+  });
+
+  canvas.addEventListener('mouseenter', () => {
+    onBoard = true;
+    chopSvg.style.display = 'none';
+    if (tool === 'pen') { penCursor.style.display = 'block'; eraserCursor.style.display = 'none'; }
+    else                { eraserCursor.style.display = 'block'; penCursor.style.display = 'none'; }
+  });
+  canvas.addEventListener('mouseleave', () => {
+    onBoard = false;
+    penCursor.style.display = 'none';
+    eraserCursor.style.display = 'none';
+    chopSvg.style.display = 'block';
+    drawChopsticks(mx, my, false);
+  });
+
+  // Show chopstick cursor immediately
+  chopSvg.style.display = 'block';
+}
+
+function setTool(tl) {
+  tool = tl;
+  document.getElementById('penBtn').classList.toggle('active', tl==='pen');
+  document.getElementById('eraserBtn').classList.toggle('active', tl==='eraser');
+  if (onBoard && !isTouchDevice) {
+    if (tl === 'pen') { penCursor.style.display='block'; eraserCursor.style.display='none'; }
+    else              { eraserCursor.style.display='block'; penCursor.style.display='none'; }
+  }
+}
+setTool('pen');
+document.getElementById('sizeSlider').addEventListener('input',(e)=>{size=parseInt(e.target.value);document.getElementById('sizeLabel').textContent=size;});
+document.getElementById('colorPicker').addEventListener('input',(e)=>{color=e.target.value;});
+
+function getPos(e) { const r=canvas.getBoundingClientRect(); const s=e.touches?e.touches[0]:e; return {x:(s.clientX-r.left)/r.width, y:(s.clientY-r.top)/r.height}; }
+function drawLive(x1,y1,x2,y2) {
+  ctx.beginPath(); ctx.moveTo(x1*canvas.width,y1*canvas.height); ctx.lineTo(x2*canvas.width,y2*canvas.height);
+  ctx.strokeStyle=tool==='eraser'?'rgba(0,0,0,1)':color; ctx.lineWidth=tool==='eraser'?size*4:size;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.globalCompositeOperation=tool==='eraser'?'destination-out':'source-over';
+  ctx.stroke(); ctx.globalCompositeOperation='source-over';
+}
+canvas.addEventListener('mousedown',(e)=>{if(!currentUser)return;drawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;currentPoints=[p];});
+canvas.addEventListener('mousemove',(e)=>{if(!drawing||!currentUser)return;const p=getPos(e);drawLive(lastX,lastY,p.x,p.y);currentPoints.push(p);lastX=p.x;lastY=p.y;});
+function endDraw(){if(!drawing)return;drawing=false;if(currentPoints.length<2)return;const stroke={color:tool==='eraser'?'rgba(0,0,0,1)':color,size:tool==='eraser'?size*4:size,eraser:tool==='eraser',points:currentPoints};allStrokes.push(stroke);if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'stroke',stroke}));currentPoints=[];}
+canvas.addEventListener('mouseup',endDraw);
+canvas.addEventListener('mouseleave',endDraw);
+canvas.addEventListener('touchstart',(e)=>{if(!currentUser)return;e.preventDefault();const p=getPos(e);drawing=true;lastX=p.x;lastY=p.y;currentPoints=[p];},{passive:false});
+canvas.addEventListener('touchmove',(e)=>{if(!drawing||!currentUser)return;e.preventDefault();const p=getPos(e);drawLive(lastX,lastY,p.x,p.y);currentPoints.push(p);lastX=p.x;lastY=p.y;},{passive:false});
+canvas.addEventListener('touchend',endDraw);
+function clearBoard(){if(!confirm(t('clearConfirm')))return;allStrokes=[];ctx.clearRect(0,0,canvas.width,canvas.height);if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'clear'}));}
+
+// ── Music ─────────────────────────────────────────────────
+let ytPlayer=null, ytReady=false;
+let ytQueue=[], ytCurrent=null, ytUserInQueue=false;
+let neteQueue=[], neteCurrent=null, neteUserInQueue=false;
+let musicSource='yt'; // 'yt' or 'nete'
+
+// NetEase Cloud Music radio: 163 ambient/lo-fi playlist (song ID 2893001017 = popular chill mix)
+const NETE_RADIO_ID = '2893001017';
+
+window.onYouTubeIframeAPIReady = function() {
+  ytReady=true;
+  ytPlayer=new YT.Player('ytPlayer',{
+    height:'1',width:'1',videoId:'',
+    playerVars:{autoplay:0,controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0},
+    events:{onReady:()=>{},onStateChange:onPlayerStateChange,onError:onPlayerError}
+  });
+};
+
+function onPlayerStateChange(event) {
+  if (musicSource!=='yt') return;
+  if (event.data===YT.PlayerState.PLAYING) {
+    document.getElementById('eqBars').classList.add('playing');
+    try { const ti=ytPlayer.getVideoData().title; if(ti) document.getElementById('npText').textContent=ti; } catch(e){}
+  }
+  if (event.data===YT.PlayerState.ENDED || event.data===YT.PlayerState.PAUSED) {
+    document.getElementById('eqBars').classList.remove('playing');
+    if (event.data===YT.PlayerState.ENDED) {
+      if (ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'song_ended',videoId:ytCurrent}));
+    }
+  }
+}
+function onPlayerError(event) {
+  if (musicSource!=='yt') return;
+  const isRadio = ytCurrent === RADIO_ID;
+  if (ws&&ws.readyState===WebSocket.OPEN && !isRadio) {
+    ws.send(JSON.stringify({type:'song_ended',videoId:ytCurrent}));
+  } else if (isRadio) {
+    document.getElementById('npText').textContent = '— radio unavailable —';
+    document.getElementById('eqBars').classList.remove('playing');
+  }
+}
+
+function playYTVideo(videoId) {
+  if (!ytReady||!ytPlayer||!ytPlayer.loadVideoById) { setTimeout(()=>playYTVideo(videoId),500); return; }
+  ytCurrent=videoId;
+  try {
+    ytPlayer.loadVideoById({videoId,startSeconds:0});
+    ytPlayer.setVolume(80);
+    if (isMuted) ytPlayer.mute();
+  } catch(e){}
+}
+
+function stopYT() {
+  try { if(ytPlayer&&ytPlayer.stopVideo) ytPlayer.stopVideo(); } catch(e){}
+  document.getElementById('eqBars').classList.remove('playing');
+}
+
+// ── NetEase Cloud Music player ───────────────────────────
+// NetEase embed: music.163.com/outchain/player?type=2&id=SONGID&auto=1&height=66
+// No JS API available — we use iframe embed + a duration timer to advance queue.
+// Song duration is fetched from NetEase public API (no auth needed for basic info).
+let neteTimer=null;
+
+function neteEmbedUrl(songId, autoplay) {
+  return `https://music.163.com/outchain/player?type=2&id=${songId}&auto=${autoplay?1:0}&height=66`;
+}
+
+function playNeteVideo(songId) {
+  neteCurrent=songId;
+  clearTimeout(neteTimer);
+  const iframe=document.getElementById('netePlayer');
+  const wrap=document.getElementById('netePlayerWrap');
+  wrap.style.display='';
+  wrap.style.cssText='position:fixed;bottom:0;right:0;width:2px;height:2px;overflow:hidden;z-index:1;opacity:0.01;pointer-events:none;';
+  iframe.src = neteEmbedUrl(songId, !isMuted);
+  document.getElementById('eqBars').classList.add('playing');
+  const item = neteQueue.find(q=>q.songId===songId);
+  document.getElementById('npText').textContent = item ? item.title : t('radio');
+  // Try to get duration from NetEase API to set timer accurately
+  fetchNeteDuration(songId).then(durationMs => {
+    const wait = durationMs || 8*60*1000;
+    neteTimer = setTimeout(()=>{
+      if (musicSource==='nete' && neteCurrent===songId) {
+        if (ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'nete_ended',songId}));
+      }
+    }, wait + 3000); // +3s buffer
+  });
+}
+
+async function fetchNeteDuration(songId) {
+  try {
+    const r = await fetch(`https://music.163.com/api/song/detail/?id=${songId}&ids=[${songId}]`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d?.songs?.[0]?.duration || null;
+  } catch(e) { return null; }
+}
+
+function stopNete() {
+  clearTimeout(neteTimer);
+  const iframe=document.getElementById('netePlayer');
+  const wrap=document.getElementById('netePlayerWrap');
+  iframe.src='about:blank';
+  wrap.style.cssText='display:none;';
+  document.getElementById('eqBars').classList.remove('playing');
+}
+
+function playNeteRadio() {
+  document.getElementById('npText').textContent = t('radio');
+  playNeteVideo(NETE_RADIO_ID);
+}
+
+// ── Source switcher ───────────────────────────────────────
+function switchMusicSource(src) {
+  if (src===musicSource) return;
+  musicSource=src;
+  document.getElementById('srcYT').classList.toggle('active', src==='yt');
+  document.getElementById('srcNete').classList.toggle('active', src==='nete');
+  document.getElementById('queueSectionYT').style.display=src==='yt'?'':'none';
+  document.getElementById('queueSectionNete').style.display=src==='nete'?'':'none';
+  if (src==='yt') {
+    stopNete();
+    if (!ytCurrent||ytCurrent===RADIO_ID) { document.getElementById('npText').textContent=t('radio'); playYTVideo(RADIO_ID); }
+    else playYTVideo(ytCurrent);
+    if (isMuted && ytPlayer) ytPlayer.mute();
+  } else {
+    stopYT();
+    if (!neteCurrent||neteCurrent===NETE_RADIO_ID) playNeteRadio();
+    else playNeteVideo(neteCurrent);
+  }
+}
+
+// ── Mute ─────────────────────────────────────────────────
+let isMuted = false;
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('muteBtn');
+  if (isMuted) {
+    if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
+    // NetEase: reload iframe without autoplay (no JS mute API)
+    if (musicSource==='nete' && neteCurrent) {
+      document.getElementById('netePlayer').src = neteEmbedUrl(neteCurrent, false);
+    }
+    btn.textContent = t('muteMuted');
+    btn.classList.add('muted');
+  } else {
+    if (ytPlayer && ytPlayer.unMute) { ytPlayer.unMute(); ytPlayer.setVolume(80); }
+    if (musicSource==='nete' && neteCurrent) {
+      document.getElementById('netePlayer').src = neteEmbedUrl(neteCurrent, true);
+    }
+    btn.textContent = t('muteSound');
+    btn.classList.remove('muted');
+  }
+}
+
+function playRadio() {
+  document.getElementById('npText').textContent = t('radio');
+  document.getElementById('eqBars').classList.add('playing');
+  playYTVideo(RADIO_ID);
+}
+
+function startMusicMobile() {
+  const btn = document.getElementById('musicTapBtn');
+  if (btn) btn.style.display = 'none';
+  if (musicSource==='yt') {
+    if (!ytCurrent || ytCurrent === RADIO_ID) playRadio();
+    else playYTVideo(ytCurrent);
+  } else {
+    if (!neteCurrent || neteCurrent === NETE_RADIO_ID) playNeteRadio();
+    else playNeteVideo(neteCurrent);
+  }
+}
+
+function handleQueueUpdate(msg) {
+  ytQueue     = msg.ytQueue   || [];
+  ytCurrent   = msg.ytCurrent || null;
+  neteQueue   = msg.neteQueue   || [];
+  neteCurrent = msg.neteCurrent || null;
+
+  renderYTQueue();
+  renderNeteQueue();
+  updateQueueBtns();
+
+  if (musicSource==='yt') {
+    if (msg.ytCurrent && msg.ytCurrent!==ytCurrent) {
+      playYTVideo(msg.ytCurrent);
+    } else if (!msg.ytCurrent && ytPlayer) {
+      try { if (ytPlayer.getVideoData&&ytPlayer.getVideoData().video_id!==RADIO_ID) playRadio(); } catch(e){}
+    }
+  } else {
+    if (msg.neteCurrent && msg.neteCurrent!==neteCurrent) {
+      playNeteVideo(msg.neteCurrent);
+    } else if (!msg.neteCurrent) {
+      playNeteRadio();
+    }
+  }
+}
+
+function renderYTQueue() {
+  const list=document.getElementById('queueListYT');
+  list.innerHTML='';
+  ytUserInQueue=false;
+  ytQueue.forEach((item,i)=>{
+    const isMe=currentUser&&item.addedBy===currentUser.name;
+    if (isMe) ytUserInQueue=true;
+    const d=document.createElement('div');
+    d.className='queue-item'+(isMe?' mine':'');
+    d.textContent=(i===0?'▶ ':`${i+1}. `)+(item.title||item.videoId)+' — '+item.addedBy;
+    list.appendChild(d);
+  });
+}
+
+function renderNeteQueue() {
+  const list=document.getElementById('queueListNete');
+  list.innerHTML='';
+  neteUserInQueue=false;
+  neteQueue.forEach((item,i)=>{
+    const isMe=currentUser&&item.addedBy===currentUser.name;
+    if (isMe) neteUserInQueue=true;
+    const d=document.createElement('div');
+    d.className='queue-item'+(isMe?' mine':'');
+    d.textContent=(i===0?'▶ ':`${i+1}. `)+(item.title||item.songId)+' — '+item.addedBy;
+    list.appendChild(d);
+  });
+}
+
+function updateQueueBtns() {
+  document.getElementById('queueAddBtn').disabled=!currentUser||ytUserInQueue;
+  document.getElementById('neteAddBtn').disabled=!currentUser||neteUserInQueue;
+}
+
+// kept for compat with updateUI
+function updateQueueBtn() { updateQueueBtns(); }
+
+function extractYTId(url) {
+  url=url.trim();
+  const p=[/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,/^([a-zA-Z0-9_-]{11})$/];
+  for (const r of p){const m=url.match(r);if(m)return m[1];}
+  return null;
+}
+
+function extractNeteId(url) {
+  url=url.trim();
+  // music.163.com/#/song?id=XXXXXXX or music.163.com/song?id=XXXXXXX
+  const m=url.match(/[?&]id=(\d+)/);
+  if (m) return m[1];
+  // plain numeric ID
+  if (/^\d+$/.test(url)) return url;
+  return null;
+}
+
+async function addToQueue() {
+  const input=document.getElementById('queueInput');
+  const msgEl=document.getElementById('queueMsg');
+  const url=input.value.trim();
+  msgEl.className='queue-msg';
+  if (!currentUser){msgEl.textContent=t('queueJoinFirst');return;}
+  if (ytUserInQueue){msgEl.textContent=t('queueWait');return;}
+  const videoId=extractYTId(url);
+  if (!videoId){msgEl.textContent=t('queueInvalid');return;}
+  msgEl.textContent=t('queueChecking');
+  try {
+    const resp=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (!resp.ok){msgEl.textContent=t('queueCantLoad');return;}
+    const data=await resp.json();
+    if (ws&&ws.readyState===WebSocket.OPEN){
+      ws.send(JSON.stringify({type:'queue_add',videoId,title:data.title||videoId,addedBy:currentUser.name}));
+      input.value='';
+      msgEl.className='queue-msg ok'; msgEl.textContent=t('queueAdded');
+      setTimeout(()=>{msgEl.textContent='';},3000);
+    }
+  } catch(e){msgEl.textContent=t('queueCantVerify');}
+}
+
+async function addToNeteQueue() {
+  const input=document.getElementById('neteInput');
+  const msgEl=document.getElementById('neteMsg');
+  const url=input.value.trim();
+  msgEl.className='queue-msg';
+  if (!currentUser){msgEl.textContent=t('queueJoinFirst');return;}
+  if (neteUserInQueue){msgEl.textContent=t('queueWait');return;}
+  const songId=extractNeteId(url);
+  if (!songId){msgEl.textContent='无效的链接！格式：music.163.com/song?id=XXXXXXX';return;}
+  msgEl.textContent=t('queueChecking');
+  let title=songId;
+  try {
+    const resp=await fetch(`https://music.163.com/api/song/detail/?id=${songId}&ids=[${songId}]`);
+    if (resp.ok) {
+      const d=await resp.json();
+      if (d?.songs?.[0]?.name) title=d.songs[0].name+(d.songs[0].artists?.[0]?.name?' - '+d.songs[0].artists[0].name:'');
+    }
+  } catch(e){ /* CORS on some browsers, fallback to songId */ }
+  if (ws&&ws.readyState===WebSocket.OPEN){
+    ws.send(JSON.stringify({type:'nete_queue_add',songId,title,addedBy:currentUser.name}));
+    input.value='';
+    msgEl.className='queue-msg ok'; msgEl.textContent=t('queueAdded');
+    setTimeout(()=>{msgEl.textContent='';},3000);
+  }
+}
+
+// ── Mobile tabs ───────────────────────────────────────────
+function isMobile(){return window.innerWidth<=768;}
+
+function switchTab(tab) {
+  const boardOuter=document.getElementById('boardOuter');
+  const rightCol=document.getElementById('rightCol');
+  const chatCol=document.getElementById('chatCol');
+  const sideCol=document.getElementById('sideCol');
+  const chatPanel=document.getElementById('chatPanel');
+  const musicPanel=document.getElementById('musicPanel');
+  const voicePanel=document.getElementById('voicePanel');
+  ['tabDraw','tabChat','tabMusic','tabVoice'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+
+  if (tab==='draw') {
+    boardOuter.classList.remove('tab-hidden');
+    rightCol.classList.add('tab-hidden');
+    document.getElementById('tabDraw').classList.add('active');
+    resizeCanvas(); replayStrokes();
+  } else if (tab==='chat') {
+    boardOuter.classList.add('tab-hidden');
+    rightCol.classList.remove('tab-hidden');
+    chatCol.style.display='flex';
+    sideCol.style.display='none';
+    document.getElementById('tabChat').classList.add('active');
+    const box=document.getElementById('chatMessages'); box.scrollTop=box.scrollHeight;
+  } else if (tab==='music') {
+    boardOuter.classList.add('tab-hidden');
+    rightCol.classList.remove('tab-hidden');
+    chatCol.style.display='none';
+    sideCol.style.display='flex';
+    voicePanel.style.display='none';
+    musicPanel.style.display='flex';
+    document.getElementById('tabMusic').classList.add('active');
+  } else { // voice
+    boardOuter.classList.add('tab-hidden');
+    rightCol.classList.remove('tab-hidden');
+    chatCol.style.display='none';
+    sideCol.style.display='flex';
+    musicPanel.style.display='none';
+    voicePanel.style.display='flex';
+    document.getElementById('tabVoice').classList.add('active');
+  }
+}
+
+window.addEventListener('resize',()=>{
+  if (!isMobile()){
+    document.getElementById('boardOuter').classList.remove('tab-hidden');
+    document.getElementById('chatCol').style.display='';
+    document.getElementById('sideCol').style.display='';
+    document.getElementById('musicPanel').style.display='';
+    document.getElementById('voicePanel').style.display='';
+    document.getElementById('rightCol').classList.remove('tab-hidden');
+    document.getElementById('chatPanel').style.display='flex';
+    document.getElementById('musicPanel').style.display='block';
+  }
+  resizeCanvas(); replayStrokes();
+});
+
+// ── i18n ──────────────────────────────────────────────────
+const T = {
+  en: {
+    joinTitle: 'JOIN THE BOARD', joinSub: 'enter your details to draw & chat, ser',
+    joinBtn: 'LET ME IN 🖊️', joinNamePh: 'Your name / nickname',
+    joinBtcPh: 'Bitcoin address (bc1...) — optional',
+    joinErrName: 'Please enter at least your name!',
+    profileTitle: 'YOUR PROFILE', save: 'SAVE', close: 'CLOSE', logout: 'LOGOUT',
+    pencil: 'PENCIL', sponge: 'SPONGE', size: 'SIZE', color: 'COLOR', clearAll: 'CLEAR ALL',
+    liveChat: '💬 LIVE CHAT', joinToChat: 'Join to chat', saySomething: 'say something...',
+    musicQueue: '🎵 MUSIC QUEUE', nowPlaying: 'NOW PLAYING', radio: '— radio —',
+    queueInfo: '🎵 YouTube: Paste a video link below. Max 8 min per song. One at a time — once yours plays, you can add another.',
+    queuePh: 'youtube.com/watch?v=...', add: 'ADD',
+    tapMusic: '▶ TAP TO START MUSIC',
+    tabDraw: '✏️ DRAW', tabChat: '💬 CHAT', tabMusic: '🎵 MUSIC',
+    subtitle: '$HOLEECHIT RUNE — SOON ON BOUND EXCHANGE',
+    footerBoard: 'BOARD RULES', footerChat: 'CHAT RULES', footerMusic: 'MUSIC RULES',
+    boardRules: ['Draw anything — it\'s visible to everyone live','No hate symbols, slurs, or explicit content','Clear All resets the board for everyone','Strokes are saved — board persists across sessions'],
+    chatRules: ['Be respectful — no harassment or spam','Chat history is permanent and stored','Your name must be unique — pick something fun','No impersonation of other users'],
+    musicRules: ['YouTube or NetEase — two independent queues','YouTube: max 8 minutes per song','One song per user per queue at a time','Radio plays automatically when queue is empty'],
+    footerTagline: '✦ draw something, ser ✦ everyone sees it live ✦',
+    online: 'online', connecting: 'connecting...', live: '● live', reconnecting: '⚠ reconnecting...', offline: '⚠ offline',
+    clearConfirm: 'Ho Lee Chit! Clear the entire board for everyone?',
+    queueJoinFirst: 'Join the board first!', queueWait: 'Wait for your song to finish first!',
+    queueInvalid: 'Invalid YouTube link!', queueChecking: 'Checking...', queueAdded: '✓ Added!',
+    queueCantLoad: "Can\'t load that video — might be private or restricted.",
+    queueCantVerify: "Couldn\'t verify the link.",
+    nameRequired: 'Name required',
+    muteSound: '🔊 SOUND', muteMuted: '🔇 MUTED',
+  },
+  zh: {
+    joinTitle: '加入画板', joinSub: '输入你的信息开始画画，朋友',
+    joinBtn: '进入 🖊️', joinNamePh: '你的名字 / 昵称',
+    joinBtcPh: '比特币地址 (bc1...) — 选填',
+    joinErrName: '请至少输入你的名字！',
+    profileTitle: '你的资料', save: '保存', close: '关闭', logout: '退出',
+    pencil: '画笔', sponge: '橡皮', size: '大小', color: '颜色', clearAll: '清除全部',
+    liveChat: '💬 实时聊天', joinToChat: '加入后才能聊天', saySomething: '说点什么...',
+    musicQueue: '🎵 音乐队列', nowPlaying: '正在播放', radio: '— 电台 —',
+    queueInfo: '🎵 YouTube：粘贴视频链接添加歌曲。每首最多8分钟，每次只能加一首——你的歌播完后可以再加。',
+    queuePh: 'youtube.com/watch?v=...', add: '添加',
+    tapMusic: '▶ 点击开始播放音乐',
+    tabDraw: '✏️ 画画', tabChat: '💬 聊天', tabMusic: '🎵 音乐',
+    subtitle: '$HOLEECHIT RUNE — 即将登陆 BOUND EXCHANGE',
+    footerBoard: '画板规则', footerChat: '聊天规则', footerMusic: '音乐规则',
+    boardRules: ['随便画——所有人实时可见','禁止仇恨符号、侮辱或露骨内容','清除全部会重置所有人的画板','笔触已保存，画板在会话间持续存在'],
+    chatRules: ['请互相尊重——禁止骚扰或刷屏','聊天记录永久保存','名字必须唯一——取个有趣的名字','禁止冒充其他用户'],
+    musicRules: ['YouTube和网易云——两个独立队列','YouTube每首最多8分钟','每个队列每次只能加一首','队列为空时自动播放电台'],
+    footerTagline: '✦ 画点什么，朋友 ✦ 所有人实时可见 ✦',
+    online: '在线', connecting: '连接中...', live: '● 实时', reconnecting: '⚠ 重连中...', offline: '⚠ 离线',
+    clearConfirm: '确定要清除所有人的画板吗？',
+    queueJoinFirst: '请先加入画板！', queueWait: '请等你的歌播完！',
+    queueInvalid: '无效的YouTube链接！', queueChecking: '检查中...', queueAdded: '✓ 已添加！',
+    queueCantLoad: '无法加载该视频——可能是私密或受限内容。',
+    queueCantVerify: '无法验证链接。',
+    nameRequired: '名字不能为空',
+    muteSound: '🔊 声音', muteMuted: '🔇 静音',
+  }
+};
+let currentLang = 'en';
+
+function t(key) { return T[currentLang][key] || T.en[key] || key; }
+
+function setLang(l) {
+  currentLang = l;
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnZH').classList.toggle('active', l==='zh');
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const l = currentLang;
+  // Header
+  document.querySelector('.subtitle').textContent = t('subtitle');
+  document.getElementById('joinBtn').textContent = currentUser ? '👤 '+currentUser.name : t('joinTitle').replace('JOIN THE BOARD','JOIN').replace('加入画板','加入');
+  // Join overlay
+  document.querySelector('.join-box h2').textContent = t('joinTitle');
+  document.querySelector('.join-box p').textContent = t('joinSub');
+  document.querySelector('.join-submit').textContent = t('joinBtn');
+  document.getElementById('inputName').placeholder = t('joinNamePh');
+  document.getElementById('inputBtc').placeholder = t('joinBtcPh');
+  // Toolbar
+  document.querySelector('#penBtn span')?.remove();
+  document.getElementById('penBtn').innerHTML = '✏️ ' + t('pencil');
+  document.querySelector('#eraserBtn span')?.remove();
+  document.getElementById('eraserBtn').innerHTML = '🧽 ' + t('sponge');
+  document.querySelectorAll('.label')[0].textContent = t('size');
+  document.querySelectorAll('.label')[2].textContent = t('color');
+  document.querySelector('.clear-btn').innerHTML = '🗑️ ' + t('clearAll');
+  // Tabs
+  document.getElementById('tabDraw').textContent = t('tabDraw');
+  document.getElementById('tabChat').textContent = t('tabChat');
+  document.getElementById('tabMusic').textContent = t('tabMusic');
+  // Chat
+  document.querySelector('.chat-header').textContent = t('liveChat');
+  document.getElementById('chatLocked').textContent = t('joinToChat');
+  const ci = document.getElementById('chatInput');
+  if (ci) ci.placeholder = t('saySomething');
+  // Music
+  document.querySelector('.music-header').textContent = t('musicQueue');
+  document.querySelector('.now-playing-label').textContent = t('nowPlaying');
+  document.querySelector('.queue-info').textContent = t('queueInfo');
+  document.getElementById('queueInput').placeholder = t('queuePh');
+  document.getElementById('queueAddBtn').textContent = t('add');
+  document.getElementById('neteAddBtn').textContent = t('add');
+  const tapBtn = document.getElementById('musicTapBtn');
+  if (tapBtn) tapBtn.textContent = t('tapMusic');
+  const npText = document.getElementById('npText');
+  if (npText && (npText.textContent === '— radio —' || npText.textContent === '— 电台 —')) npText.textContent = t('radio');
+  // Profile modal
+  document.querySelector('.modal-box h2').textContent = t('profileTitle');
+  document.querySelector('.modal-save').textContent = t('save');
+  document.querySelector('.modal-close').textContent = t('close');
+  document.querySelector('.modal-logout').textContent = t('logout');
+  // Footer
+  const footerTitles = document.querySelectorAll('.footer-block-title');
+  const footerRuleLists = document.querySelectorAll('.footer-rule');
+  if (footerTitles[0]) footerTitles[0].textContent = t('footerBoard');
+  if (footerTitles[1]) footerTitles[1].textContent = t('footerChat');
+  if (footerTitles[2]) footerTitles[2].textContent = t('footerMusic');
+  ['boardRules','chatRules','musicRules'].forEach((key,i)=>{
+    if (footerRuleLists[i]) footerRuleLists[i].innerHTML = t(key).map(r=>`<li>${r}</li>`).join('');
+  });
+  document.querySelector('.footer-bottom').innerHTML = t('footerTagline')+'<br/><span style="opacity:0.4;font-size:0.55rem">© 2025 HO LEE CHIT</span>';
+  // Mute button
+  const muteBtn = document.getElementById('muteBtn');
+  if (muteBtn) muteBtn.textContent = isMuted ? t('muteMuted') : t('muteSound');
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────
+document.addEventListener('keydown',(e)=>{
+  if (e.target.tagName==='INPUT') return;
+  if (e.key==='Enter'&&document.getElementById('chatInput')===document.activeElement) sendChat();
+});
+document.getElementById('chatInput')?.addEventListener('keydown',(e)=>{if(e.key==='Enter')sendChat();});
+document.getElementById('queueInput')?.addEventListener('keydown',(e)=>{if(e.key==='Enter')addToQueue();});
+
+// ── Init ──────────────────────────────────────────────────
+loadUser(); updateUI(); connect();
+applyTranslations();
+if (isMobile()) switchTab('draw');
+
+// Load YouTube API
+const ytTag=document.createElement('script');
+ytTag.src='https://www.youtube.com/iframe_api';
+document.head.appendChild(ytTag);
+
+// ── Voice Chat (Livekit) ──────────────────────────────────
+const LK_URL = 'wss://holeechit-satamb9v.livekit.cloud';
+const SERVER_URL = WS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
+
+let lkRoom = null;
+let voiceJoined = false;
+let voiceMicMuted = false;
+
+async function toggleVoice() {
+  if (voiceJoined) {
+    leaveVoice();
+  } else {
+    joinVoice();
+  }
+}
+
+async function joinVoice() {
+  if (!currentUser) {
+    setVoiceStatus('Join the board first!', true);
+    return;
+  }
+  const joinBtn = document.getElementById('voiceJoinBtn');
+  const muteBtn = document.getElementById('voiceMuteBtn');
+  joinBtn.disabled = true;
+  setVoiceStatus('Connecting...');
+
+  try {
+    // Get token from our server
+    const resp = await fetch(`${SERVER_URL}/livekit-token?name=${encodeURIComponent(currentUser.name)}`);
+    if (!resp.ok) throw new Error('Token fetch failed: ' + resp.status);
+    const { token } = await resp.json();
+
+    lkRoom = new LivekitClient.Room({
+      adaptiveStream: true,
+      dynacast: true,
+      audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    });
+
+    // Events
+    lkRoom.on(LivekitClient.RoomEvent.ParticipantConnected, renderVoiceParticipants);
+    lkRoom.on(LivekitClient.RoomEvent.ParticipantDisconnected, renderVoiceParticipants);
+    lkRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, participant) => {
+      if (track.kind === LivekitClient.Track.Kind.Audio) {
+        const el = track.attach();
+        el.style.display = 'none';
+        el.volume = 1.0;
+        // Force loudspeaker on mobile (prevents earpiece routing)
+        el.setAttribute('playsinline', '');
+        el.setAttribute('autoplay', '');
+        if (el.setSinkId && typeof el.setSinkId === 'function') {
+          el.setSinkId('').catch(() => {});
+        }
+        document.body.appendChild(el);
+        el.play().catch(() => {});
+      }
+      renderVoiceParticipants();
+    });
+    lkRoom.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+      track.detach().forEach(el => el.remove());
+      renderVoiceParticipants();
+    });
+    lkRoom.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, renderVoiceParticipants);
+    lkRoom.on(LivekitClient.RoomEvent.TrackMuted, renderVoiceParticipants);
+    lkRoom.on(LivekitClient.RoomEvent.TrackUnmuted, renderVoiceParticipants);
+    lkRoom.on(LivekitClient.RoomEvent.Disconnected, () => {
+      voiceJoined = false;
+      joinBtn.textContent = 'JOIN VOICE';
+      joinBtn.classList.remove('in-room');
+      muteBtn.style.display = 'none';
+      joinBtn.disabled = false;
+      renderVoiceParticipants();
+      setVoiceStatus('disconnected');
+    });
+
+    await lkRoom.connect(LK_URL, token);
+    await lkRoom.localParticipant.setMicrophoneEnabled(true);
+
+    voiceJoined = true;
+    voiceMicMuted = false;
+    joinBtn.textContent = 'LEAVE VOICE';
+    joinBtn.classList.add('in-room');
+    muteBtn.style.display = '';
+    muteBtn.textContent = '🎤 MIC ON';
+    muteBtn.classList.remove('muted');
+    joinBtn.disabled = false;
+    setVoiceStatus('');
+    renderVoiceParticipants();
+  } catch (err) {
+    console.error('Voice error:', err);
+    setVoiceStatus('Failed to connect: ' + err.message, true);
+    joinBtn.disabled = false;
+    lkRoom = null;
+  }
+}
+
+function leaveVoice() {
+  if (lkRoom) {
+    lkRoom.disconnect();
+    lkRoom = null;
+  }
+  // detach all audio elements created by livekit
+  document.querySelectorAll('audio').forEach(el => el.remove());
+}
+
+async function toggleVoiceMic() {
+  if (!lkRoom) return;
+  voiceMicMuted = !voiceMicMuted;
+  await lkRoom.localParticipant.setMicrophoneEnabled(!voiceMicMuted);
+  const btn = document.getElementById('voiceMuteBtn');
+  btn.textContent = voiceMicMuted ? '🔇 MIC OFF' : '🎤 MIC ON';
+  btn.classList.toggle('muted', voiceMicMuted);
+  renderVoiceParticipants();
+}
+
+function renderVoiceParticipants() {
+  const wrap = document.getElementById('voiceParticipants');
+  wrap.innerHTML = '';
+  if (!lkRoom) return;
+
+  const speakers = new Set((lkRoom.activeSpeakers || []).map(p => p.identity));
+
+  // Local participant
+  const local = lkRoom.localParticipant;
+  const localMuted = !local.isMicrophoneEnabled;
+  const localDiv = document.createElement('div');
+  localDiv.className = 'voice-participant' + (speakers.has(local.identity) ? ' speaking' : '') + (localMuted ? ' muted-mic' : '');
+  localDiv.innerHTML = `<span class="vp-icon">${localMuted ? '🔇' : '🎤'}</span>${local.identity} <span style="font-size:0.55rem;opacity:0.5">(you)</span>`;
+  wrap.appendChild(localDiv);
+
+  // Remote participants
+  lkRoom.remoteParticipants.forEach((p) => {
+    const audioMuted = !p.isMicrophoneEnabled;
+    const div = document.createElement('div');
+    div.className = 'voice-participant' + (speakers.has(p.identity) ? ' speaking' : '') + (audioMuted ? ' muted-mic' : '');
+    div.innerHTML = `<span class="vp-icon">${audioMuted ? '🔇' : '🎤'}</span>${p.identity}`;
+    wrap.appendChild(div);
+  });
+}
+
+function setVoiceStatus(msg, isErr) {
+  const el = document.getElementById('voiceStatus');
+  el.textContent = msg;
+  el.className = 'voice-status' + (isErr ? ' err' : '');
+}
+
+// On desktop start radio automatically after a short delay
+// On mobile, user must tap the button (browser autoplay policy)
+if (!isTouchDevice) {
+  setTimeout(()=>{ if(ytReady&&!ytCurrent&&musicSource==='yt') playRadio(); },3000);
+}
+</script>
+</body>
+</html>
