@@ -205,15 +205,15 @@ body.on-board #drawCanvas { cursor: none !important; }
 <!-- Cursors -->
 <!-- Chopstick cursor (shown outside board) -->
 <svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible;top:0;left:0;width:100vw;height:100vh">
-  <!-- upper chopstick -->
-  <line id="chop1" stroke="#c8941a" stroke-width="2" stroke-linecap="round"/>
-  <!-- lower chopstick -->
-  <line id="chop2" stroke="#8B5E1A" stroke-width="2" stroke-linecap="round"/>
+  <!-- left chopstick -->
+  <line id="chop1" stroke="#c8941a" stroke-width="3" stroke-linecap="round"/>
+  <!-- right chopstick -->
+  <line id="chop2" stroke="#8B5E1A" stroke-width="3" stroke-linecap="round"/>
   <!-- sushi piece at tip -->
   <g id="sushiG">
-    <ellipse id="sushiRice" rx="4" ry="3" fill="#f5f0e8" stroke="#ccc" stroke-width="0.5"/>
-    <ellipse id="sushiNori" rx="4" ry="1.2" fill="#1a1a1a" transform="translate(0,0)"/>
-    <ellipse id="sushiFish" rx="3" ry="1.8" fill="#ff6b6b" transform="translate(0,-1.8)"/>
+    <ellipse id="sushiRice" rx="7" ry="5" fill="#f5f0e8" stroke="#ddd" stroke-width="0.5"/>
+    <ellipse id="sushiNori" rx="5" ry="1.5" fill="#1a1a1a" transform="translate(0,0)"/>
+    <ellipse id="sushiFish" rx="3.5" ry="2" fill="#ff6b6b" transform="translate(0,0)"/>
   </g>
 </svg>
 <!-- Pen cursor (shown on board in pen mode) -->
@@ -534,33 +534,38 @@ const eraserCursor= document.getElementById('eraserCursor');
 let onBoard = false;
 let mx = 0, my = 0;
 
-// Chopstick geometry (half size compared to v1)
-// sushi sits at cursor tip (mx, my)
-// left stick goes up-left, right stick goes up-right
-// they converge at sushi when clicking
+// Sushi = pointer (at x,y)
+// Chopsticks are to the LEFT of sushi, tips pointing RIGHT toward sushi
+// sticks go from far-left (back of chopsticks) to near sushi (tips)
 function drawChopsticks(x, y, clicking) {
-  // (x,y) = mouse hotspot = sushi center on the LEFT
-  // chopsticks extend from near sushi toward the RIGHT, spreading up/down
-  const stickLen = 27;
-  const spread   = clicking ? 1 : 8;
+  const sw = 5, sh = 3.5;
 
-  const baseX = x + 5;
-  const baseY = y;
-  const farX  = baseX + stickLen;
-
-  // upper stick: base → upper-right
-  chop1.setAttribute('x1', baseX); chop1.setAttribute('y1', baseY);
-  chop1.setAttribute('x2', farX);  chop1.setAttribute('y2', baseY - spread);
-  // lower stick: base → lower-right
-  chop2.setAttribute('x1', baseX); chop2.setAttribute('y1', baseY);
-  chop2.setAttribute('x2', farX);  chop2.setAttribute('y2', baseY + spread);
-
-  // sushi at hotspot
+  // Sushi at pointer (x,y)
   sushiRice.setAttribute('cx', x); sushiRice.setAttribute('cy', y);
-  sushiNori.setAttribute('transform', `translate(${x},${y})`);
-  sushiFish.setAttribute('transform', `translate(${x},${y - 1.8})`);
-},${y - 2})`);
-  sushiFish.setAttribute('transform', `translate(${x},${y - 3.5})`);
+  sushiRice.setAttribute('rx', sw); sushiRice.setAttribute('ry', sh);
+  sushiNori.setAttribute('transform', `translate(${x},${y - 1.5})`);
+  sushiNori.setAttribute('rx', sw); sushiNori.setAttribute('ry', 1.5);
+  sushiFish.setAttribute('transform', `translate(${x},${y - 2.5})`);
+  sushiFish.setAttribute('rx', sw - 1.5); sushiFish.setAttribute('ry', 2);
+
+  // Pivot point: where both sticks meet (far right, closed end)
+  const pivotX = x + 60;
+  const pivotY = y;
+
+  // Near end: hovers above/below sushi center
+  // idle: sh+4 = just outside sushi vertically
+  // click: sh-1 = touching sushi surface
+  const nearX = x;  // aligned with sushi center horizontally
+  const openY  = sh + 5;   // idle — hovering just outside sushi
+  const closedY = sh - 1;  // click — touching sushi top/bottom
+
+  const spread = clicking ? closedY : openY;
+
+  chop1.setAttribute('x1', nearX); chop1.setAttribute('y1', y - spread);
+  chop1.setAttribute('x2', pivotX); chop1.setAttribute('y2', pivotY);
+
+  chop2.setAttribute('x1', nearX); chop2.setAttribute('y1', y + spread);
+  chop2.setAttribute('x2', pivotX); chop2.setAttribute('y2', pivotY);
 }
 
 if (!isTouchDevice) {
