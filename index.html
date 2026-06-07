@@ -151,12 +151,11 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4cff72; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.6)} }
 
-/* CURSOR */
-.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; display: none; }
-#chopstickCursor { width: 0; height: 0; }
-#chopstickCursor svg { position: fixed; pointer-events: none; z-index: 9999; display: none; }
-body.pen-mode #drawCanvas, body.eraser-mode #drawCanvas { cursor: none; }
-body.chop-mode * { cursor: none !important; }
+/* CURSOR - hide default everywhere on desktop */
+@media (hover: hover) {
+  * { cursor: none !important; }
+}
+body.on-board #drawCanvas { cursor: none !important; }
 
 /* Mobile music tap button */
 .music-tap-btn { display: none; width: 100%; background: #FFD700; border: none; color: #1a0a00; font-family: "Bebas Neue", cursive; font-size: 1.1rem; padding: 10px; letter-spacing: 0.08em; cursor: pointer; }
@@ -203,11 +202,24 @@ body.chop-mode * { cursor: none !important; }
 <body>
 
 <div id="ytPlayer"></div>
-<!-- Chopstick cursor SVG -->
-<svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible" width="60" height="60" viewBox="0 0 60 60">
-  <line id="chop1" x1="10" y1="0" x2="30" y2="55" stroke="#c8941a" stroke-width="4" stroke-linecap="round"/>
-  <line id="chop2" x1="20" y1="0" x2="30" y2="55" stroke="#c8941a" stroke-width="4" stroke-linecap="round"/>
+<!-- Cursors -->
+<!-- Chopstick cursor (shown outside board) -->
+<svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible;top:0;left:0" width="0" height="0">
+  <!-- left chopstick -->
+  <line id="chop1" stroke="#c8941a" stroke-width="3" stroke-linecap="round"/>
+  <!-- right chopstick -->
+  <line id="chop2" stroke="#8B5E1A" stroke-width="3" stroke-linecap="round"/>
+  <!-- sushi piece at tip -->
+  <g id="sushiG">
+    <ellipse id="sushiRice" rx="7" ry="5" fill="#f5f0e8" stroke="#ddd" stroke-width="0.5"/>
+    <ellipse id="sushiNori" rx="7" ry="2" fill="#1a1a1a" transform="translate(0,-2)"/>
+    <ellipse id="sushiFish" rx="5" ry="3" fill="#ff6b6b" transform="translate(0,-3.5)"/>
+  </g>
 </svg>
+<!-- Pen cursor (shown on board in pen mode) -->
+<div id="penCursor" style="position:fixed;pointer-events:none;z-index:9999;display:none;font-size:22px;transform:translate(-10%,-88%)">✏️</div>
+<!-- Eraser cursor (shown on board in eraser mode) -->
+<div id="eraserCursor" style="position:fixed;pointer-events:none;z-index:9999;display:none;font-size:22px;transform:translate(-30%,-70%)">🧽</div>
 
 <!-- FULL-PAGE JOIN OVERLAY -->
 <div class="join-overlay" id="joinOverlay">
@@ -508,59 +520,91 @@ function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStr
 
 const isTouchDevice=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
 
-// ── Chopstick cursor ──────────────────────────────────────
-const chopSvg = document.getElementById('chopSvg');
-const chop1 = document.getElementById('chop1');
-const chop2 = document.getElementById('chop2');
-let chopOnBoard = false;
+// ── Chopstick + sushi cursor ──────────────────────────────
+const chopSvg     = document.getElementById('chopSvg');
+const chop1       = document.getElementById('chop1');
+const chop2       = document.getElementById('chop2');
+const sushiG      = document.getElementById('sushiG');
+const sushiRice   = document.getElementById('sushiRice');
+const sushiNori   = document.getElementById('sushiNori');
+const sushiFish   = document.getElementById('sushiFish');
+const penCursor   = document.getElementById('penCursor');
+const eraserCursor= document.getElementById('eraserCursor');
 
-function updateChopsticks(x, y, clicking) {
-  chopSvg.style.left = (x - 30) + 'px';
-  chopSvg.style.top  = (y - 55) + 'px';
-  // closed = chopsticks touching at bottom tip, open = spread at top
-  const spread = clicking ? 0 : 10;
-  chop1.setAttribute('x1', 30 - spread);
-  chop2.setAttribute('x1', 30 + spread);
+let onBoard = false;
+let mx = 0, my = 0;
+
+// Chopstick geometry (half size compared to v1)
+// sushi sits at cursor tip (mx, my)
+// left stick goes up-left, right stick goes up-right
+// they converge at sushi when clicking
+function drawChopsticks(x, y, clicking) {
+  const spread = clicking ? 2 : 18; // px spread at top
+  const stickLen = 55;
+  // tips meet at sushi position
+  const tx = x, ty = y - 6; // slightly above sushi center
+  // tops spread left and right
+  const lx = tx - spread, ly = ty - stickLen;
+  const rx = tx + spread, ry = ty - stickLen;
+
+  chop1.setAttribute('x1', lx); chop1.setAttribute('y1', ly);
+  chop1.setAttribute('x2', tx); chop1.setAttribute('y2', ty);
+  chop2.setAttribute('x1', rx); chop2.setAttribute('y1', ry);
+  chop2.setAttribute('x2', tx); chop2.setAttribute('y2', ty);
+
+  // sushi at cursor point
+  sushiRice.setAttribute('cx', x); sushiRice.setAttribute('cy', y);
+  sushiNori.setAttribute('transform', `translate(${x},${y - 2})`);
+  sushiFish.setAttribute('transform', `translate(${x},${y - 3.5})`);
 }
 
 if (!isTouchDevice) {
   document.addEventListener('mousemove', (e) => {
-    if (chopOnBoard) return; // canvas area uses pen/eraser cursor
-    chopSvg.style.display = 'block';
-    updateChopsticks(e.clientX, e.clientY, false);
+    mx = e.clientX; my = e.clientY;
+    if (onBoard) {
+      // show pen or eraser cursor
+      if (tool === 'pen') {
+        penCursor.style.left = mx + 'px'; penCursor.style.top = my + 'px';
+      } else {
+        eraserCursor.style.left = mx + 'px'; eraserCursor.style.top = my + 'px';
+      }
+    } else {
+      drawChopsticks(mx, my, false);
+    }
   });
   document.addEventListener('mousedown', (e) => {
-    if (!chopOnBoard) updateChopsticks(e.clientX, e.clientY, true);
+    if (!onBoard) drawChopsticks(e.clientX, e.clientY, true);
   });
   document.addEventListener('mouseup', (e) => {
-    if (!chopOnBoard) updateChopsticks(e.clientX, e.clientY, false);
+    if (!onBoard) drawChopsticks(e.clientX, e.clientY, false);
   });
+
+  canvas.addEventListener('mouseenter', () => {
+    onBoard = true;
+    chopSvg.style.display = 'none';
+    if (tool === 'pen') { penCursor.style.display = 'block'; eraserCursor.style.display = 'none'; }
+    else                { eraserCursor.style.display = 'block'; penCursor.style.display = 'none'; }
+  });
+  canvas.addEventListener('mouseleave', () => {
+    onBoard = false;
+    penCursor.style.display = 'none';
+    eraserCursor.style.display = 'none';
+    chopSvg.style.display = 'block';
+    drawChopsticks(mx, my, false);
+  });
+
+  // Show chopstick cursor immediately
+  chopSvg.style.display = 'block';
 }
 
 function setTool(tl) {
-  tool=tl;
-  document.getElementById('penBtn').classList.toggle('active',tl==='pen');
-  document.getElementById('eraserBtn').classList.toggle('active',tl==='eraser');
-  if (!isTouchDevice) {
-    document.body.classList.toggle('pen-mode',tl==='pen');
-    document.body.classList.toggle('eraser-mode',tl==='eraser');
-  } else {
-    canvas.style.cursor='crosshair';
+  tool = tl;
+  document.getElementById('penBtn').classList.toggle('active', tl==='pen');
+  document.getElementById('eraserBtn').classList.toggle('active', tl==='eraser');
+  if (onBoard && !isTouchDevice) {
+    if (tl === 'pen') { penCursor.style.display='block'; eraserCursor.style.display='none'; }
+    else              { eraserCursor.style.display='block'; penCursor.style.display='none'; }
   }
-}
-
-// Show pen/eraser cursor only when hovering the canvas
-if (!isTouchDevice) {
-  canvas.addEventListener('mouseenter', () => {
-    chopOnBoard = true;
-    chopSvg.style.display = 'none';
-    document.body.classList.add(tool==='eraser' ? 'eraser-mode' : 'pen-mode');
-  });
-  canvas.addEventListener('mouseleave', () => {
-    chopOnBoard = false;
-    chopSvg.style.display = 'block';
-    document.body.classList.remove('pen-mode','eraser-mode');
-  });
 }
 setTool('pen');
 document.getElementById('sizeSlider').addEventListener('input',(e)=>{size=parseInt(e.target.value);document.getElementById('sizeLabel').textContent=size;});
