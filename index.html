@@ -15,7 +15,6 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 @keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
 .title { font-size: clamp(2.6rem, 8vw, 6rem); color: #FFD700; text-shadow: 4px 4px 0 #7a5500, -2px -2px 0 #7a5500, 2px -2px 0 #7a5500, -2px 2px 0 #7a5500; letter-spacing: 0.05em; line-height: 1; margin-bottom: 2px; }
 .subtitle { font-family: 'Permanent Marker', cursive; font-size: clamp(0.7rem, 1.8vw, 1rem); color: #ff6b35; letter-spacing: 0.12em; margin-bottom: 10px; }
-
 .header-left { position: absolute; top: 24px; left: 24px; display: flex; align-items: center; gap: 10px; }
 .lang-switcher { display: flex; gap: 4px; }
 .lang-btn { background: transparent; border: 2px solid #7a5500; color: #7a5500; font-family: 'Bangers', cursive; font-size: 0.9rem; padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
@@ -24,7 +23,6 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .x-link { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #000; border: 2px solid #7a5500; border-radius: 6px; text-decoration: none; transition: all 0.15s; flex-shrink: 0; }
 .x-link:hover { border-color: #FFD700; transform: scale(1.1); }
 .x-link svg { width: 16px; height: 16px; fill: #fff; }
-
 .join-btn-header { position: absolute; top: 24px; right: 24px; background: transparent; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 1.1rem; padding: 8px 20px; cursor: pointer; border-radius: 4px; letter-spacing: 0.08em; transition: all 0.15s; }
 .join-btn-header:hover { background: #FFD700; color: #1a0a00; }
 .join-btn-header.joined { border-color: #4cff72; color: #4cff72; font-size: 0.85rem; padding: 6px 14px; }
@@ -44,8 +42,8 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .clear-btn { border-color: #ff4444; color: #ff4444; background: #2a0000; }
 .clear-btn:hover { background: #ff4444; color: white; }
 
-/* BOARD + CHAT LAYOUT */
-.board-chat-wrap { display: flex; align-items: flex-start; padding: 18px 24px 10px; gap: 14px; background: #1a0a00; }
+/* MAIN LAYOUT */
+.board-chat-wrap { display: flex; align-items: flex-start; padding: 18px 16px 10px; gap: 12px; background: #1a0a00; }
 .board-outer { flex-shrink: 0; }
 .board-container { position: relative; aspect-ratio: 1 / 1; height: calc(100vh - 310px); min-height: 400px; border-radius: 6px; overflow: hidden; }
 
@@ -68,50 +66,73 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 }
 #drawCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; z-index: 2; }
 
+/* RIGHT COLUMN */
+.right-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; height: calc(100vh - 310px); min-height: 400px; }
+
 /* CHAT */
 .chat-panel {
-  width: 240px; flex-shrink: 0;
-  height: calc(100vh - 310px); min-height: 400px;
+  flex: 1; min-height: 0;
   background: rgba(0,0,0,0.6);
   border: 2px solid #7a5500;
   border-radius: 6px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
-.chat-header {
-  background: #2a1500; border-bottom: 2px solid #7a5500;
-  padding: 8px 12px;
-  font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em;
-  text-align: center; flex-shrink: 0;
-}
-.chat-messages {
-  flex: 1; overflow-y: auto; padding: 8px;
-  display: flex; flex-direction: column; gap: 6px;
-  scrollbar-width: thin; scrollbar-color: #7a5500 transparent;
-}
+.chat-header { background: #2a1500; border-bottom: 2px solid #7a5500; padding: 8px 12px; font-size: 0.95rem; color: #FFD700; letter-spacing: 0.08em; text-align: center; flex-shrink: 0; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: #7a5500; border-radius: 2px; }
 .chat-msg { font-family: 'Permanent Marker', cursive; font-size: 0.68rem; line-height: 1.4; word-break: break-word; }
 .chat-msg .chat-name { color: #FFD700; font-size: 0.72rem; display: block; margin-bottom: 1px; }
 .chat-msg .chat-text { color: rgba(255,235,180,0.85); }
 .chat-msg .chat-time { color: rgba(255,215,0,0.25); font-size: 0.55rem; float: right; margin-top: 2px; }
-.chat-input-wrap {
-  display: flex; border-top: 2px solid #7a5500; flex-shrink: 0;
-}
-.chat-input {
-  flex: 1; background: #1a0a00; border: none; outline: none;
-  color: #FFD700; font-family: 'Permanent Marker', cursive;
-  font-size: 0.72rem; padding: 8px 10px;
-  placeholder-color: rgba(255,215,0,0.3);
-}
+.chat-input-wrap { display: flex; border-top: 2px solid #7a5500; flex-shrink: 0; }
+.chat-input { flex: 1; background: #1a0a00; border: none; outline: none; color: #FFD700; font-family: 'Permanent Marker', cursive; font-size: 0.72rem; padding: 8px 10px; }
 .chat-input::placeholder { color: rgba(255,215,0,0.3); }
-.chat-send {
-  background: #2a1500; border: none; border-left: 2px solid #7a5500;
-  color: #FFD700; font-size: 1rem; padding: 0 10px;
-  cursor: pointer; transition: background 0.12s;
-}
+.chat-send { background: #2a1500; border: none; border-left: 2px solid #7a5500; color: #FFD700; font-size: 1rem; padding: 0 10px; cursor: pointer; transition: background 0.12s; }
 .chat-send:hover { background: #FFD700; color: #1a0a00; }
 .chat-locked { text-align: center; padding: 12px 8px; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.35); font-size: 0.65rem; line-height: 1.6; }
+
+/* MUSIC PANEL */
+.music-panel {
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.7);
+  border: 2px solid #7a5500;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.music-header { background: #1a0800; border-bottom: 2px solid #7a5500; padding: 7px 12px; font-size: 0.9rem; color: #FFD700; letter-spacing: 0.08em; text-align: center; }
+.now-playing { padding: 8px 12px; border-bottom: 1px solid #3a2000; }
+.now-playing-label { font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.4); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+.now-playing-title { font-family: 'Permanent Marker', cursive; color: #FFD700; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-playing-eq { display: inline-flex; align-items: flex-end; gap: 2px; margin-left: 6px; height: 12px; vertical-align: middle; }
+.eq-bar { width: 3px; background: #4cff72; border-radius: 1px; animation: eq 0.8s ease-in-out infinite; }
+.eq-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
+.eq-bar:nth-child(2) { height: 8px; animation-delay: 0.15s; }
+.eq-bar:nth-child(3) { height: 6px; animation-delay: 0.3s; }
+.eq-bar:nth-child(4) { height: 10px; animation-delay: 0.1s; }
+@keyframes eq { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+.eq-bars-wrap { display: none; }
+.eq-bars-wrap.playing { display: inline-flex; }
+
+/* Queue */
+.queue-section { padding: 8px 10px; }
+.queue-info { font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.4); font-size: 0.55rem; line-height: 1.5; margin-bottom: 6px; }
+.queue-list { display: flex; flex-direction: column; gap: 4px; max-height: 90px; overflow-y: auto; margin-bottom: 6px; scrollbar-width: thin; scrollbar-color: #7a5500 transparent; }
+.queue-item { font-family: 'Permanent Marker', cursive; font-size: 0.6rem; color: rgba(255,215,0,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 4px; border-left: 2px solid #7a5500; }
+.queue-item.mine { border-color: #FFD700; color: #FFD700; }
+.queue-add { display: flex; gap: 4px; }
+.queue-input { flex: 1; background: #1a0a00; border: 2px solid #7a5500; color: #FFD700; font-family: 'Permanent Marker', cursive; font-size: 0.62rem; padding: 5px 8px; border-radius: 4px; outline: none; min-width: 0; }
+.queue-input::placeholder { color: rgba(255,215,0,0.25); }
+.queue-input:focus { border-color: #FFD700; }
+.queue-btn { background: #2a1500; border: 2px solid #FFD700; color: #FFD700; font-family: 'Bangers', cursive; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: all 0.12s; }
+.queue-btn:hover { background: #FFD700; color: #1a0a00; }
+.queue-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.queue-msg { font-family: 'Permanent Marker', cursive; font-size: 0.58rem; color: #ff4444; margin-top: 4px; min-height: 14px; }
+.queue-msg.ok { color: #4cff72; }
+
+/* Hidden YT player */
+#ytPlayer { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; }
 
 /* LOGIN OVERLAY */
 .login-overlay { position: absolute; inset: 0; z-index: 10; background: rgba(20,8,0,0.72); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); border-radius: 6px; }
@@ -168,50 +189,32 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
 .footer-block-text { font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.45); font-size: 0.7rem; line-height: 1.7; letter-spacing: 0.04em; }
 .footer-bottom { text-align: center; font-family: 'Permanent Marker', cursive; color: rgba(255,215,0,0.3); font-size: 0.65rem; padding-top: 16px; letter-spacing: 0.1em; border-top: 1px solid #2a1000; margin-top: 8px; }
 
+/* MOBILE TABS */
+.mobile-tabs { display: none; border-bottom: 2px solid #FFD700; }
+.mobile-tab { flex: 1; text-align: center; padding: 10px; font-family: 'Bangers', cursive; font-size: 1rem; color: #7a5500; cursor: pointer; letter-spacing: 0.08em; background: #1a0a00; border: none; transition: all 0.15s; }
+.mobile-tab.active { color: #FFD700; background: #2a1500; }
+
 /* RESPONSIVE */
-@media (max-width: 600px) {
-  .header { padding: 12px 8px 4px; }
-  .logo-img { width: 80px; }
-  .title { font-size: 2rem; }
+@media (max-width: 768px) {
+  .mobile-tabs { display: flex; }
+  .board-chat-wrap { flex-direction: column; padding: 0; gap: 0; }
+  .board-outer { width: 100%; }
+  .board-outer.tab-hidden, .right-col.tab-hidden { display: none; }
+  .board-container { aspect-ratio: 1/1; height: auto; width: 100%; min-height: unset; border-radius: 0; }
+  .right-col { flex-direction: column; height: auto; min-height: unset; padding: 8px; gap: 8px; }
+  .chat-panel { height: 260px; min-height: unset; border-radius: 6px; }
+  .music-panel { border-radius: 6px; }
   .header-left { top: 10px; left: 6px; gap: 3px; }
   .join-btn-header { top: 10px; right: 6px; font-size: 0.85rem; padding: 5px 10px; }
   .lang-btn { font-size: 0.7rem; padding: 2px 7px; }
   .toolbar { gap: 6px; padding: 6px 8px; }
   .tool-btn { font-size: 0.8rem; padding: 4px 8px; }
-
-  /* Tab switcher */
-  .mobile-tabs { display: flex; border-bottom: 2px solid #FFD700; }
-  .mobile-tab {
-    flex: 1; text-align: center; padding: 10px;
-    font-family: 'Bangers', cursive; font-size: 1rem;
-    color: #7a5500; cursor: pointer; letter-spacing: 0.08em;
-    background: #1a0a00; border: none; transition: all 0.15s;
-  }
-  .mobile-tab.active { color: #FFD700; background: #2a1500; }
-
-  /* Board+chat layout on mobile */
-  .board-chat-wrap { flex-direction: column; padding: 0; gap: 0; }
-  .board-outer { width: 100%; }
-  .board-outer.tab-hidden { display: none; }
-  .board-container {
-    height: calc(100vh - 320px);
-    min-height: 250px;
-    border-radius: 0;
-  }
-  .chat-panel {
-    width: 100%;
-    height: calc(100vh - 320px);
-    min-height: 250px;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
-  .chat-panel.tab-hidden { display: none; }
 }
 </style>
 </head>
 <body>
 
+<div id="ytPlayer"></div>
 <div class="cursor-custom" id="cursorPen">✏️</div>
 <div class="cursor-custom" id="cursorEraser">🧽</div>
 
@@ -223,9 +226,9 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
     <input class="modal-edit-field" id="editBtc" type="text" maxlength="90" placeholder="Bitcoin address (bc1...)">
     <div class="modal-err" id="editErr"></div>
     <div class="modal-btns">
-      <button class="modal-save" onclick="saveProfile()" data-en="SAVE" data-zh="保存">SAVE</button>
-      <button class="modal-close" onclick="closeModal()" data-en="CLOSE" data-zh="关闭">CLOSE</button>
-      <button class="modal-logout" onclick="logout()" data-en="LOGOUT" data-zh="退出">LOGOUT</button>
+      <button class="modal-save" onclick="saveProfile()">SAVE</button>
+      <button class="modal-close" onclick="closeModal()">CLOSE</button>
+      <button class="modal-logout" onclick="logout()">LOGOUT</button>
     </div>
   </div>
 </div>
@@ -236,77 +239,100 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
     onload="document.getElementById('titleText').style.display='none'"
     onerror="this.style.display='none'">
   <div class="title" id="titleText">HO LEE CHIT</div>
-  <div class="subtitle" data-en="$HooLeeChit on Bitcoin" data-zh="比特币上的 $HooLeeChit">$HooLeeChit on Bitcoin</div>
-
+  <div class="subtitle">$HooLeeChit on Bitcoin</div>
   <div class="header-left">
     <a class="x-link" href="https://x.com/holeechitrune" target="_blank" rel="noopener" title="Follow on X">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </a>
     <div class="lang-switcher">
       <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
       <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
     </div>
   </div>
-
   <button class="join-btn-header" id="joinBtn" onclick="onJoinClick()">JOIN</button>
 </div>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ <span data-en="PENCIL" data-zh="画笔">PENCIL</span></button>
-  <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 <span data-en="SPONGE" data-zh="橡皮">SPONGE</span></button>
+  <button class="tool-btn active" id="penBtn" onclick="setTool('pen')">✏️ PENCIL</button>
+  <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')">🧽 SPONGE</button>
   <div style="display:flex;align-items:center;gap:6px;">
-    <span class="label" data-en="SIZE" data-zh="大小">SIZE</span>
+    <span class="label">SIZE</span>
     <input type="range" class="size-slider" id="sizeSlider" min="1" max="40" value="4">
     <span class="label" id="sizeLabel">4</span>
   </div>
   <div style="display:flex;align-items:center;gap:6px;">
-    <span class="label" data-en="COLOR" data-zh="颜色">COLOR</span>
+    <span class="label">COLOR</span>
     <input type="color" class="color-picker" id="colorPicker" value="#1a0a00">
   </div>
-  <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ <span data-en="CLEAR ALL" data-zh="清除全部">CLEAR ALL</span></button>
+  <button class="tool-btn clear-btn" onclick="clearBoard()">🗑️ CLEAR ALL</button>
 </div>
 
-<!-- MOBILE TABS (hidden on desktop via JS) -->
-<div class="mobile-tabs" id="mobileTabs" style="display:none">
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tabDraw" onclick="switchTab('draw')">✏️ DRAW</button>
   <button class="mobile-tab" id="tabChat" onclick="switchTab('chat')">💬 CHAT</button>
+  <button class="mobile-tab" id="tabMusic" onclick="switchTab('music')">🎵 MUSIC</button>
 </div>
 
-<!-- BOARD + CHAT -->
+<!-- BOARD + RIGHT COLUMN -->
 <div class="board-chat-wrap">
-  <div class="board-outer">
+  <div class="board-outer" id="boardOuter">
     <div class="board-container">
       <div class="parchment-bg"></div>
       <canvas id="drawCanvas"></canvas>
       <div class="login-overlay" id="loginOverlay">
         <div class="login-box">
-          <h2 data-en="JOIN THE BOARD" data-zh="加入画板">JOIN THE BOARD</h2>
-          <p data-en="enter your details to draw, ser" data-zh="输入你的信息开始画画">enter your details to draw, ser</p>
+          <h2>JOIN THE BOARD</h2>
+          <p>enter your details to draw, ser</p>
           <input class="login-input" id="inputName" type="text" placeholder="Your name / nickname" maxlength="32">
           <input class="login-input" id="inputBtc" type="text" placeholder="Bitcoin address (bc1...)" maxlength="90">
-          <button class="login-submit" onclick="submitJoin()">
-            <span data-en="LET ME DRAW 🖊️" data-zh="开始画画 🖊️">LET ME DRAW 🖊️</span>
-          </button>
+          <button class="login-submit" onclick="submitJoin()">LET ME DRAW 🖊️</button>
           <div class="login-error" id="loginError">Please enter at least your name!</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CHAT -->
-  <div class="chat-panel" id="chatPanel">
-    <div class="chat-header">💬 <span data-en="LIVE CHAT" data-zh="实时聊天">LIVE CHAT</span></div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <div id="chatInputArea">
-      <div class="chat-locked" id="chatLocked" data-en="Join the board to chat" data-zh="加入画板才能聊天">Join the board to chat</div>
-      <div class="chat-input-wrap" id="chatInputWrap" style="display:none">
-        <input class="chat-input" id="chatInput" type="text" maxlength="300" placeholder="say something...">
-        <button class="chat-send" onclick="sendChat()">➤</button>
+  <!-- RIGHT COLUMN: chat + music -->
+  <div class="right-col" id="rightCol">
+
+    <!-- CHAT -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-header">💬 LIVE CHAT</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div id="chatInputArea">
+        <div class="chat-locked" id="chatLocked">Join the board to chat</div>
+        <div class="chat-input-wrap" id="chatInputWrap" style="display:none">
+          <input class="chat-input" id="chatInput" type="text" maxlength="300" placeholder="say something...">
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
       </div>
     </div>
+
+    <!-- MUSIC -->
+    <div class="music-panel" id="musicPanel">
+      <div class="music-header">🎵 MUSIC QUEUE</div>
+      <div class="now-playing">
+        <div class="now-playing-label">NOW PLAYING</div>
+        <div class="now-playing-title" id="nowPlayingTitle">
+          <span id="npText">— radio —</span>
+          <span class="eq-bars-wrap" id="eqBars">
+            <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+          </span>
+        </div>
+      </div>
+      <div class="queue-section">
+        <div class="queue-info">🎵 Add your YouTube link to the queue. Max 8 min. One song at a time — when it ends, you can add another.</div>
+        <div class="queue-list" id="queueList"></div>
+        <div class="queue-add">
+          <input class="queue-input" id="queueInput" type="text" placeholder="youtube.com/watch?v=..." maxlength="100">
+          <button class="queue-btn" id="queueAddBtn" onclick="addToQueue()">ADD</button>
+        </div>
+        <div class="queue-msg" id="queueMsg"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -315,53 +341,43 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bangers', cursive; 
   <div class="footer-grid">
     <div class="footer-block">
       <div class="footer-icon">🌍</div>
-      <div class="footer-block-title" data-en="WORLDWIDE CANVAS" data-zh="全球画板">WORLDWIDE CANVAS</div>
-      <div class="footer-block-text" data-en="One shared board. Anyone on the planet can draw on it, right now, in real time." data-zh="一块共享画板。地球上任何人都可以实时在上面画画。">One shared board. Anyone on the planet can draw on it, right now, in real time.</div>
+      <div class="footer-block-title">WORLDWIDE CANVAS</div>
+      <div class="footer-block-text">One shared board. Anyone on the planet can draw on it, right now, in real time.</div>
     </div>
     <div class="footer-block">
       <div class="footer-icon">⚡</div>
-      <div class="footer-block-title" data-en="LIVE SYNC" data-zh="实时同步">LIVE SYNC</div>
-      <div class="footer-block-text" data-en="Every stroke you make appears instantly on everyone else's screen. No refresh needed." data-zh="你的每一笔都会立刻出现在其他人的屏幕上。无需刷新。">Every stroke you make appears instantly on everyone else's screen. No refresh needed.</div>
+      <div class="footer-block-title">LIVE SYNC</div>
+      <div class="footer-block-text">Every stroke you make appears instantly on everyone else's screen. No refresh needed.</div>
     </div>
     <div class="footer-block">
       <div class="footer-icon">₿</div>
-      <div class="footer-block-title" data-en="BITCOIN RUNE" data-zh="比特币符文">BITCOIN RUNE</div>
-      <div class="footer-block-text" data-en="$HooLeeChit is a meme Rune on Bitcoin. Join the community and leave your mark." data-zh="$HooLeeChit 是比特币上的梗符文。加入社区，留下你的印记。">$HooLeeChit is a meme Rune on Bitcoin. Join the community and leave your mark.</div>
+      <div class="footer-block-title">BITCOIN RUNE</div>
+      <div class="footer-block-text">$HooLeeChit is a meme Rune on Bitcoin. Join the community and leave your mark.</div>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span data-en="✦ draw something, ser ✦ everyone sees it live ✦" data-zh="✦ 画点什么吧 ✦ 全世界都能看到 ✦">✦ draw something, ser ✦ everyone sees it live ✦</span>
-    <br/>
-    <span style="opacity:0.4;font-size:0.55rem;letter-spacing:0.08em">© 2025 HO LEE CHIT</span>
-  </div>
+  <div class="footer-bottom">✦ draw something, ser ✦ everyone sees it live ✦<br/><span style="opacity:0.4;font-size:0.55rem">© 2025 HO LEE CHIT</span></div>
 </div>
 
-<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> <span data-en="online" data-zh="在线">online</span></div>
+<div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> online</div>
 <div class="ws-status" id="wsStatus">connecting...</div>
 
 <script>
 const WS_URL = 'wss://holeechit-server.onrender.com';
+const RADIO_URL = 'https://www.youtube.com/watch?v=X4VbdwhkE10';
+const MAX_DURATION = 8 * 60; // 8 minutes in seconds
 
 let currentUser = null;
 let ws = null;
 
 // ── User session ──────────────────────────────────────────
 function loadUser() {
-  try {
-    const saved = localStorage.getItem('hlc_user');
-    if (saved) currentUser = JSON.parse(saved);
-  } catch(e) { currentUser = null; }
+  try { const s = localStorage.getItem('hlc_user'); if (s) currentUser = JSON.parse(s); } catch(e) { currentUser = null; }
 }
 function saveUserLocal(name, btc) {
   currentUser = { name, btc };
   localStorage.setItem('hlc_user', JSON.stringify(currentUser));
 }
-function logout() {
-  localStorage.removeItem('hlc_user');
-  currentUser = null;
-  closeModal();
-  updateUI();
-}
+function logout() { localStorage.removeItem('hlc_user'); currentUser = null; closeModal(); updateUI(); }
 
 function updateUI() {
   const joinBtn = document.getElementById('joinBtn');
@@ -375,12 +391,13 @@ function updateUI() {
     chatLocked.style.display = 'none';
     chatInputWrap.style.display = 'flex';
   } else {
-    joinBtn.textContent = currentLang === 'zh' ? '加入' : 'JOIN';
+    joinBtn.textContent = 'JOIN';
     joinBtn.classList.remove('joined');
     overlay.classList.remove('hidden');
     chatLocked.style.display = 'block';
     chatInputWrap.style.display = 'none';
   }
+  updateQueueBtn();
 }
 
 function onJoinClick() {
@@ -388,52 +405,29 @@ function onJoinClick() {
     document.getElementById('editName').value = currentUser.name;
     document.getElementById('editBtc').value = currentUser.btc || '';
     document.getElementById('editErr').style.display = 'none';
-    document.getElementById('editName').classList.remove('input-error');
-    document.getElementById('editBtc').classList.remove('input-error');
     document.getElementById('profileModal').classList.remove('hidden');
   }
 }
-function closeModal() {
-  document.getElementById('profileModal').classList.add('hidden');
-}
-document.getElementById('profileModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
+document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
-// ── Register (new user) ───────────────────────────────────
+function saveProfile() {
+  const newName = document.getElementById('editName').value.trim();
+  const newBtc  = document.getElementById('editBtc').value.trim();
+  const oldName = currentUser?.name || '';
+  if (!newName) { document.getElementById('editErr').textContent='Name required'; document.getElementById('editErr').style.display='block'; return; }
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type:'update_user', oldName, newName, newBtc }));
+}
+
 function submitJoin() {
   const name = document.getElementById('inputName').value.trim();
   const btc  = document.getElementById('inputBtc').value.trim();
   const err  = document.getElementById('loginError');
-  if (!name) { err.textContent = currentLang === 'zh' ? '请输入你的名字！' : 'Please enter at least your name!'; err.style.display = 'block'; return; }
   err.style.display = 'none';
   document.getElementById('inputName').classList.remove('input-error');
   document.getElementById('inputBtc').classList.remove('input-error');
-
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'register', name, btc }));
-  } else {
-    // Offline fallback: skip server validation
-    saveUserLocal(name, btc);
-    updateUI();
-  }
-}
-
-// ── Save profile (edit) ───────────────────────────────────
-function saveProfile() {
-  const newName = document.getElementById('editName').value.trim();
-  const newBtc  = document.getElementById('editBtc').value.trim();
-  const err     = document.getElementById('editErr');
-  if (!newName) { err.textContent = 'Name required'; err.style.display = 'block'; return; }
-  err.style.display = 'none';
-
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'update_user', oldName: currentUser.name, newName, newBtc }));
-  } else {
-    saveUserLocal(newName, newBtc);
-    updateUI();
-    closeModal();
-  }
+  if (!name) { err.textContent='Please enter at least your name!'; err.style.display='block'; return; }
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type:'register', name, btc }));
 }
 
 // ── Chat ──────────────────────────────────────────────────
@@ -441,80 +435,58 @@ function sendChat() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text || !currentUser) return;
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'chat', name: currentUser.name, text }));
-  }
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type:'chat', name:currentUser.name, text }));
   input.value = '';
 }
 document.addEventListener('DOMContentLoaded', () => {
   const ci = document.getElementById('chatInput');
-  if (ci) ci.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+  if (ci) ci.addEventListener('keydown', e => { if (e.key==='Enter') sendChat(); });
+  document.getElementById('queueInput').addEventListener('keydown', e => { if (e.key==='Enter') addToQueue(); });
 });
-
 function appendChatMsg(msg) {
   const box = document.getElementById('chatMessages');
   const d = document.createElement('div');
   d.className = 'chat-msg';
   const t = new Date(msg.ts);
-  const timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
-  d.innerHTML = `<span class="chat-name">${escHtml(msg.name)}</span><span class="chat-text">${escHtml(msg.text)}</span><span class="chat-time">${timeStr}</span>`;
+  const timeStr = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+  d.innerHTML = `<span class="chat-name">${esc(msg.name)}</span><span class="chat-text">${esc(msg.text)}</span><span class="chat-time">${timeStr}</span>`;
   box.appendChild(d);
-  // Keep max 100 visible
   while (box.children.length > 100) box.removeChild(box.firstChild);
   box.scrollTop = box.scrollHeight;
 }
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── WebSocket ─────────────────────────────────────────────
 function connect() {
   const status = document.getElementById('wsStatus');
   status.textContent = 'connecting...'; status.className = 'ws-status';
   try { ws = new WebSocket(WS_URL); } catch(e) { status.textContent = '⚠ offline'; status.className = 'ws-status error'; return; }
-
   ws.onopen = () => { status.textContent = '● live'; status.className = 'ws-status connected'; };
-
   ws.onmessage = (e) => {
     const msg = JSON.parse(e.data);
-
-    if (msg.type === 'init') { allStrokes = msg.strokes || []; replayStrokes(); }
+    if (msg.type === 'init') { allStrokes = msg.strokes||[]; replayStrokes(); }
     if (msg.type === 'stroke') { allStrokes.push(msg.stroke); drawStroke(msg.stroke); }
-    if (msg.type === 'clear') { allStrokes = []; ctx.clearRect(0,0,canvas.width,canvas.height); }
+    if (msg.type === 'clear') { allStrokes=[]; ctx.clearRect(0,0,canvas.width,canvas.height); }
     if (msg.type === 'presence') { document.getElementById('onlineCount').textContent = msg.count; }
-
-    if (msg.type === 'chat_init') {
-      document.getElementById('chatMessages').innerHTML = '';
-      (msg.messages || []).forEach(appendChatMsg);
-    }
+    if (msg.type === 'chat_init') { document.getElementById('chatMessages').innerHTML=''; (msg.messages||[]).forEach(appendChatMsg); }
     if (msg.type === 'chat') { appendChatMsg(msg.msg); }
-
-    if (msg.type === 'register_ok') {
-      saveUserLocal(msg.name, msg.btc);
-      updateUI();
-    }
+    if (msg.type === 'register_ok') { saveUserLocal(msg.name, msg.btc); updateUI(); }
     if (msg.type === 'register_err') {
       const err = document.getElementById('loginError');
-      err.textContent = msg.msg;
-      err.style.display = 'block';
-      if (msg.field === 'name') document.getElementById('inputName').classList.add('input-error');
-      if (msg.field === 'btc')  document.getElementById('inputBtc').classList.add('input-error');
+      err.textContent = msg.msg; err.style.display = 'block';
+      if (msg.field==='name') document.getElementById('inputName').classList.add('input-error');
+      if (msg.field==='btc')  document.getElementById('inputBtc').classList.add('input-error');
     }
-
-    if (msg.type === 'update_ok') {
-      saveUserLocal(msg.name, msg.btc);
-      updateUI();
-      closeModal();
-    }
+    if (msg.type === 'update_ok') { saveUserLocal(msg.name, msg.btc); updateUI(); closeModal(); }
     if (msg.type === 'update_err') {
       const err = document.getElementById('editErr');
-      err.textContent = msg.msg;
-      err.style.display = 'block';
-      if (msg.field === 'name') document.getElementById('editName').classList.add('input-error');
-      if (msg.field === 'btc')  document.getElementById('editBtc').classList.add('input-error');
+      err.textContent = msg.msg; err.style.display = 'block';
+      if (msg.field==='name') document.getElementById('editName').classList.add('input-error');
+      if (msg.field==='btc')  document.getElementById('editBtc').classList.add('input-error');
     }
+    // Music
+    if (msg.type === 'queue_update') { handleQueueUpdate(msg.queue, msg.currentVideoId); }
   };
-
   ws.onclose = () => { status.textContent = '⚠ reconnecting...'; status.className = 'ws-status error'; setTimeout(connect, 3000); };
   ws.onerror = () => { status.textContent = '⚠ offline'; status.className = 'ws-status error'; };
 }
@@ -522,175 +494,284 @@ function connect() {
 // ── Canvas ────────────────────────────────────────────────
 const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
-
 function resizeCanvas() {
   const container = canvas.parentElement;
-  // board-container is square via CSS aspect-ratio: 1/1
-  // just match canvas resolution to container size
   const size = container.clientWidth;
-  canvas.width  = size;
-  canvas.height = size;
+  canvas.width = size; canvas.height = size;
 }
 window.addEventListener('resize', () => { resizeCanvas(); replayStrokes(); });
 resizeCanvas();
 
-let tool = 'pen', drawing = false, lastX = 0, lastY = 0;
-let color = '#1a0a00', size = 4;
-let allStrokes = [], currentPoints = [];
+let tool='pen', drawing=false, lastX=0, lastY=0;
+let color='#1a0a00', size=4;
+let allStrokes=[], currentPoints=[];
 
 function drawStroke(s) {
-  if (!s.points || s.points.length < 2) return;
+  if (!s.points||s.points.length<2) return;
   ctx.beginPath();
-  ctx.moveTo(s.points[0].x * canvas.width, s.points[0].y * canvas.height);
-  for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i].x * canvas.width, s.points[i].y * canvas.height);
-  ctx.strokeStyle = s.color; ctx.lineWidth = s.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.globalCompositeOperation = s.eraser ? 'destination-out' : 'source-over';
-  ctx.stroke(); ctx.globalCompositeOperation = 'source-over';
+  ctx.moveTo(s.points[0].x*canvas.width, s.points[0].y*canvas.height);
+  for (let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x*canvas.width, s.points[i].y*canvas.height);
+  ctx.strokeStyle=s.color; ctx.lineWidth=s.size; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.globalCompositeOperation = s.eraser?'destination-out':'source-over';
+  ctx.stroke(); ctx.globalCompositeOperation='source-over';
 }
 function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStrokes.forEach(drawStroke); }
 
-// ── Cursor ────────────────────────────────────────────────
 const cursorPen = document.getElementById('cursorPen');
 const cursorEraser = document.getElementById('cursorEraser');
-const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
+const isTouchDevice = ('ontouchstart' in window)||(navigator.maxTouchPoints>0);
 if (!isTouchDevice) {
   document.addEventListener('mousemove', (e) => {
-    cursorPen.style.left = e.clientX+'px'; cursorPen.style.top = e.clientY+'px';
-    cursorEraser.style.left = e.clientX+'px'; cursorEraser.style.top = e.clientY+'px';
+    cursorPen.style.left=e.clientX+'px'; cursorPen.style.top=e.clientY+'px';
+    cursorEraser.style.left=e.clientX+'px'; cursorEraser.style.top=e.clientY+'px';
   });
 }
-
 function setTool(t) {
-  tool = t;
-  document.getElementById('penBtn').classList.toggle('active', t==='pen');
-  document.getElementById('eraserBtn').classList.toggle('active', t==='eraser');
-  if (isTouchDevice) {
-    cursorPen.style.display = 'none';
-    cursorEraser.style.display = 'none';
-    document.body.classList.remove('pen-mode','eraser-mode');
-    canvas.style.cursor = 'crosshair';
-  } else {
-    document.body.classList.toggle('pen-mode', t==='pen');
-    document.body.classList.toggle('eraser-mode', t==='eraser');
-    cursorPen.style.display = t==='pen' ? 'block' : 'none';
-    cursorEraser.style.display = t==='eraser' ? 'block' : 'none';
-  }
+  tool=t;
+  document.getElementById('penBtn').classList.toggle('active',t==='pen');
+  document.getElementById('eraserBtn').classList.toggle('active',t==='eraser');
+  if (isTouchDevice) { cursorPen.style.display='none'; cursorEraser.style.display='none'; document.body.classList.remove('pen-mode','eraser-mode'); canvas.style.cursor='crosshair'; }
+  else { document.body.classList.toggle('pen-mode',t==='pen'); document.body.classList.toggle('eraser-mode',t==='eraser'); cursorPen.style.display=t==='pen'?'block':'none'; cursorEraser.style.display=t==='eraser'?'block':'none'; }
 }
 setTool('pen');
+document.getElementById('sizeSlider').addEventListener('input',(e)=>{size=parseInt(e.target.value);document.getElementById('sizeLabel').textContent=size;});
+document.getElementById('colorPicker').addEventListener('input',(e)=>{color=e.target.value;});
 
-document.getElementById('sizeSlider').addEventListener('input', (e) => { size=parseInt(e.target.value); document.getElementById('sizeLabel').textContent=size; });
-document.getElementById('colorPicker').addEventListener('input', (e) => { color=e.target.value; });
-
-// ── Drawing events ────────────────────────────────────────
-function getPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  const src = e.touches ? e.touches[0] : e;
-  return { x: (src.clientX-rect.left)/rect.width, y: (src.clientY-rect.top)/rect.height };
-}
+function getPos(e) { const rect=canvas.getBoundingClientRect(); const src=e.touches?e.touches[0]:e; return {x:(src.clientX-rect.left)/rect.width,y:(src.clientY-rect.top)/rect.height}; }
 function drawLive(x1,y1,x2,y2) {
-  ctx.beginPath(); ctx.moveTo(x1*canvas.width, y1*canvas.height); ctx.lineTo(x2*canvas.width, y2*canvas.height);
-  ctx.strokeStyle = tool==='eraser' ? 'rgba(0,0,0,1)' : color;
-  ctx.lineWidth = tool==='eraser' ? size*4 : size;
+  ctx.beginPath(); ctx.moveTo(x1*canvas.width,y1*canvas.height); ctx.lineTo(x2*canvas.width,y2*canvas.height);
+  ctx.strokeStyle=tool==='eraser'?'rgba(0,0,0,1)':color; ctx.lineWidth=tool==='eraser'?size*4:size;
   ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.globalCompositeOperation = tool==='eraser' ? 'destination-out' : 'source-over';
+  ctx.globalCompositeOperation=tool==='eraser'?'destination-out':'source-over';
   ctx.stroke(); ctx.globalCompositeOperation='source-over';
 }
 function canDraw() { return !!currentUser; }
-
-canvas.addEventListener('mousedown', (e) => { if(!canDraw()) return; drawing=true; const p=getPos(e); lastX=p.x; lastY=p.y; currentPoints=[p]; });
-canvas.addEventListener('mousemove', (e) => { if(!drawing||!canDraw()) return; const p=getPos(e); drawLive(lastX,lastY,p.x,p.y); currentPoints.push(p); lastX=p.x; lastY=p.y; });
+canvas.addEventListener('mousedown',(e)=>{if(!canDraw())return;drawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;currentPoints=[p];});
+canvas.addEventListener('mousemove',(e)=>{if(!drawing||!canDraw())return;const p=getPos(e);drawLive(lastX,lastY,p.x,p.y);currentPoints.push(p);lastX=p.x;lastY=p.y;});
 function endDraw() {
-  if(!drawing) return; drawing=false;
-  if(currentPoints.length<2) return;
-  const stroke = { color: tool==='eraser'?'rgba(0,0,0,1)':color, size: tool==='eraser'?size*4:size, eraser: tool==='eraser', points: currentPoints };
+  if(!drawing)return;drawing=false;
+  if(currentPoints.length<2)return;
+  const stroke={color:tool==='eraser'?'rgba(0,0,0,1)':color,size:tool==='eraser'?size*4:size,eraser:tool==='eraser',points:currentPoints};
   allStrokes.push(stroke);
-  if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'stroke',stroke}));
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'stroke',stroke}));
   currentPoints=[];
 }
-canvas.addEventListener('mouseup', endDraw);
-canvas.addEventListener('mouseleave', endDraw);
-canvas.addEventListener('touchstart', (e) => { if(!canDraw()) return; e.preventDefault(); const p=getPos(e); drawing=true; lastX=p.x; lastY=p.y; currentPoints=[p]; }, {passive:false});
-canvas.addEventListener('touchmove', (e) => { if(!drawing||!canDraw()) return; e.preventDefault(); const p=getPos(e); drawLive(lastX,lastY,p.x,p.y); currentPoints.push(p); lastX=p.x; lastY=p.y; }, {passive:false});
-canvas.addEventListener('touchend', endDraw);
-
+canvas.addEventListener('mouseup',endDraw);
+canvas.addEventListener('mouseleave',endDraw);
+canvas.addEventListener('touchstart',(e)=>{if(!canDraw())return;e.preventDefault();const p=getPos(e);drawing=true;lastX=p.x;lastY=p.y;currentPoints=[p];},{passive:false});
+canvas.addEventListener('touchmove',(e)=>{if(!drawing||!canDraw())return;e.preventDefault();const p=getPos(e);drawLive(lastX,lastY,p.x,p.y);currentPoints.push(p);lastX=p.x;lastY=p.y;},{passive:false});
+canvas.addEventListener('touchend',endDraw);
 function clearBoard() {
-  if(!confirm('Ho Lee Chit! Clear the entire board for everyone?')) return;
-  allStrokes=[]; ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'clear'}));
+  if(!confirm('Ho Lee Chit! Clear the entire board for everyone?'))return;
+  allStrokes=[];ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'clear'}));
 }
 
-// ── i18n ──────────────────────────────────────────────────
-let currentLang = 'en';
-const placeholders = {
-  en: { name: 'Your name / nickname', btc: 'Bitcoin address (bc1...)', chat: 'say something...' },
-  zh: { name: '你的名字 / 昵称', btc: '比特币地址 (bc1...)', chat: '说点什么...' }
+// ── Music / YouTube Queue ─────────────────────────────────
+let ytPlayer = null;
+let ytReady = false;
+let musicQueue = [];       // [{videoId, title, addedBy}]
+let currentVideoId = null; // what's playing right now
+let userHasInQueue = false;
+let nextTimer = null;
+
+// Extract YouTube video ID from URL
+function extractYTId(url) {
+  url = url.trim();
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+  return null;
+}
+
+// Load YT IFrame API
+window.onYouTubeIframeAPIReady = function() {
+  ytReady = true;
+  ytPlayer = new YT.Player('ytPlayer', {
+    height: '1', width: '1',
+    videoId: '',
+    playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0 },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError
+    }
+  });
 };
 
-function setLang(l) {
-  currentLang = l;
-  document.getElementById('btnEN').classList.toggle('active', l === 'en');
-  document.getElementById('btnZH').classList.toggle('active', l === 'zh');
-  document.querySelectorAll('[data-en]').forEach(el => {
-    if (el.tagName === 'INPUT') return;
-    el.textContent = el.dataset[l];
-  });
-  document.getElementById('inputName').placeholder = placeholders[l].name;
-  document.getElementById('inputBtc').placeholder = placeholders[l].btc;
-  const ci = document.getElementById('chatInput');
-  if (ci) ci.placeholder = placeholders[l].chat;
-  if (!currentUser) document.getElementById('joinBtn').textContent = l === 'zh' ? '加入' : 'JOIN';
-  const ws_el = document.getElementById('wsStatus');
-  if (ws_el.classList.contains('connected')) ws_el.textContent = l === 'en' ? '● live' : '● 实时';
+function onPlayerReady() {
+  // Player ready — will start when queue arrives
 }
 
-// ── Mobile tabs ───────────────────────────────────────────
-function isMobile() { return window.innerWidth <= 600; }
-
-function initMobileTabs() {
-  if (isMobile()) {
-    document.getElementById('mobileTabs').style.display = 'flex';
-    switchTab('draw');
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    document.getElementById('eqBars').classList.add('playing');
+    // Update now playing title
+    try {
+      const title = ytPlayer.getVideoData().title;
+      if (title) document.getElementById('npText').textContent = title;
+    } catch(e) {}
+  }
+  if (event.data === YT.PlayerState.ENDED) {
+    document.getElementById('eqBars').classList.remove('playing');
+    // Notify server that current song ended → go to next
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'song_ended', videoId: currentVideoId }));
+    }
+  }
+  if (event.data === YT.PlayerState.PAUSED) {
+    document.getElementById('eqBars').classList.remove('playing');
   }
 }
 
+function onPlayerError(event) {
+  // Video can't play (restricted embed) → skip it
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'song_ended', videoId: currentVideoId }));
+  }
+}
+
+function playVideo(videoId) {
+  if (!ytReady || !ytPlayer || !ytPlayer.loadVideoById) return;
+  currentVideoId = videoId;
+  try {
+    ytPlayer.loadVideoById({ videoId, startSeconds: 0 });
+    ytPlayer.setVolume(80);
+  } catch(e) { console.error('YT play error', e); }
+}
+
+function playRadio() {
+  currentVideoId = null;
+  document.getElementById('npText').textContent = '— radio —';
+  document.getElementById('eqBars').classList.add('playing');
+  const radioId = extractYTId(RADIO_URL);
+  if (radioId) playVideo(radioId);
+}
+
+function handleQueueUpdate(queue, nowVideoId) {
+  musicQueue = queue || [];
+  renderQueue();
+  updateQueueBtn();
+
+  // Sync playback
+  if (nowVideoId && nowVideoId !== currentVideoId) {
+    // New song to play
+    currentVideoId = nowVideoId;
+    playVideo(nowVideoId);
+  } else if (!nowVideoId && queue.length === 0) {
+    // Queue empty → radio
+    if (currentVideoId !== 'radio') {
+      currentVideoId = 'radio';
+      playRadio();
+    }
+  }
+}
+
+function renderQueue() {
+  const list = document.getElementById('queueList');
+  list.innerHTML = '';
+  userHasInQueue = false;
+  musicQueue.forEach((item, i) => {
+    const d = document.createElement('div');
+    const isMe = currentUser && item.addedBy === currentUser.name;
+    if (isMe) userHasInQueue = true;
+    d.className = 'queue-item' + (isMe ? ' mine' : '');
+    const pos = i === 0 ? '▶ ' : `${i+1}. `;
+    d.textContent = pos + (item.title || item.videoId) + ' — ' + item.addedBy;
+    list.appendChild(d);
+  });
+}
+
+function updateQueueBtn() {
+  const btn = document.getElementById('queueAddBtn');
+  if (!currentUser) { btn.disabled = true; btn.title = 'Join the board first'; return; }
+  btn.disabled = userHasInQueue;
+  btn.title = userHasInQueue ? 'Wait for your song to finish' : '';
+}
+
+async function addToQueue() {
+  const input = document.getElementById('queueInput');
+  const msgEl = document.getElementById('queueMsg');
+  const url = input.value.trim();
+  msgEl.className = 'queue-msg';
+
+  if (!currentUser) { msgEl.textContent = 'Join the board first!'; return; }
+  if (userHasInQueue) { msgEl.textContent = 'Wait for your song to finish first!'; return; }
+
+  const videoId = extractYTId(url);
+  if (!videoId) { msgEl.textContent = 'Invalid YouTube link!'; return; }
+
+  // Check duration via oEmbed (no API key needed)
+  msgEl.textContent = 'Checking...';
+  try {
+    const resp = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (!resp.ok) { msgEl.textContent = "Can't load that video — might be private or restricted."; return; }
+    const data = await resp.json();
+    const title = data.title || videoId;
+    // oEmbed doesn't give duration — we trust the user for now; server can't check either without API key
+    // We just verify it exists
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'queue_add', videoId, title, addedBy: currentUser.name }));
+      input.value = '';
+      msgEl.className = 'queue-msg ok';
+      msgEl.textContent = '✓ Added to queue!';
+      setTimeout(() => { msgEl.textContent = ''; }, 3000);
+    }
+  } catch(e) {
+    msgEl.textContent = "Couldn't verify the link. Try again.";
+  }
+}
+
+// ── Mobile tabs ───────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 768; }
+
 function switchTab(tab) {
-  const boardOuter = document.querySelector('.board-outer');
-  const chatPanel  = document.getElementById('chatPanel');
-  const tabDraw    = document.getElementById('tabDraw');
-  const tabChat    = document.getElementById('tabChat');
+  const boardOuter = document.getElementById('boardOuter');
+  const rightCol   = document.getElementById('rightCol');
+  ['tabDraw','tabChat','tabMusic'].forEach(id => document.getElementById(id).classList.remove('active'));
+
   if (tab === 'draw') {
-    boardOuter.classList.remove('tab-hidden');
-    chatPanel.classList.add('tab-hidden');
-    tabDraw.classList.add('active');
-    tabChat.classList.remove('active');
+    boardOuter.classList.remove('tab-hidden'); rightCol.classList.add('tab-hidden');
+    document.getElementById('tabDraw').classList.add('active');
     resizeCanvas(); replayStrokes();
   } else {
-    boardOuter.classList.add('tab-hidden');
-    chatPanel.classList.remove('tab-hidden');
-    tabDraw.classList.remove('active');
-    tabChat.classList.add('active');
-    // scroll chat to bottom
-    const box = document.getElementById('chatMessages');
-    box.scrollTop = box.scrollHeight;
+    boardOuter.classList.add('tab-hidden'); rightCol.classList.remove('tab-hidden');
+    if (tab === 'chat') {
+      document.getElementById('tabChat').classList.add('active');
+      const box = document.getElementById('chatMessages'); box.scrollTop = box.scrollHeight;
+    } else {
+      document.getElementById('tabMusic').classList.add('active');
+    }
   }
 }
 
 window.addEventListener('resize', () => {
-  if (isMobile()) {
-    document.getElementById('mobileTabs').style.display = 'flex';
-  } else {
-    document.getElementById('mobileTabs').style.display = 'none';
-    document.querySelector('.board-outer').classList.remove('tab-hidden');
-    document.getElementById('chatPanel').classList.remove('tab-hidden');
+  if (!isMobile()) {
+    document.getElementById('boardOuter').classList.remove('tab-hidden');
+    document.getElementById('rightCol').classList.remove('tab-hidden');
   }
+  resizeCanvas(); replayStrokes();
 });
 
+// ── i18n (simplified) ─────────────────────────────────────
+let currentLang = 'en';
+function setLang(l) {
+  currentLang = l;
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnZH').classList.toggle('active', l==='zh');
+}
+
 // ── Init ──────────────────────────────────────────────────
-loadUser();
-updateUI();
-connect();
-initMobileTabs();
+loadUser(); updateUI(); connect();
+// Init mobile tabs on mobile
+if (isMobile()) switchTab('draw');
+
+// Load YouTube IFrame API
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
 </script>
 </body>
 </html>

@@ -14,7 +14,11 @@ let users = {};   // { name_lower: { name, btc, createdAt }, ... }
 let chatAll = []; // full history
 const CHAT_BROADCAST_LIMIT = 100;
 
-let db, colStrokes, colUsers, colChat;
+let db, colStrokes, colUsers, colChat, colQueue;
+
+// ── Music queue ───────────────────────────────────────────
+let musicQueue = []; // [{ videoId, title, addedBy }]
+let currentVideoId = null; // null = radio
 
 // ── MongoDB helpers ───────────────────────────────────────
 async function saveStrokes() {
@@ -25,6 +29,9 @@ async function saveUsers() {
 }
 async function saveChat() {
   await colChat.replaceOne({ _id: 'main' }, { _id: 'main', data: chatAll }, { upsert: true });
+}
+async function saveQueue() {
+  await colQueue.replaceOne({ _id: "main" }, { _id: "main", data: musicQueue, currentVideoId }, { upsert: true });
 }
 
 // ── Admin auth helper ─────────────────────────────────────
@@ -96,6 +103,7 @@ wss.on('connection', (ws) => {
 
   ws.send(JSON.stringify({ type: 'init', strokes }));
   ws.send(JSON.stringify({ type: 'chat_init', messages: chatAll.slice(-CHAT_BROADCAST_LIMIT) }));
+  ws.send(JSON.stringify({ type: 'queue_update', queue: musicQueue, currentVideoId }));
   broadcast({ type: 'presence', count: clients.size });
 
   ws.on('message', (msg) => {
@@ -183,6 +191,31 @@ wss.on('connection', (ws) => {
       saveChat().catch(console.error);
       broadcast({ type: 'chat', msg: chatMsg });
     }
+
+    // -- Queue add --
+    if (data.type === 'queue_add') {
+      const videoId = (data.videoId || '').trim().slice(0, 20);
+      const title   = (data.title   || videoId).trim().slice(0, 100);
+      const addedBy = (data.addedBy || '').trim().slice(0, 32);
+      if (!videoId || !addedBy) return;
+      const alreadyIn = musicQueue.some(q => q.addedBy.toLowerCase() === addedBy.toLowerCase());
+      if (alreadyIn) return ws.send(JSON.stringify({ type: 'queue_err', msg: 'You already have a song in the queue' }));
+      musicQueue.push({ videoId, title, addedBy });
+      if (!currentVideoId) currentVideoId = videoId;
+      saveQueue().catch(console.error);
+      broadcastQueueUpdate();
+    }
+
+    // -- Song ended --
+    if (data.type === 'song_ended') {
+      const endedId = (data.videoId || '').trim();
+      if (endedId && endedId === currentVideoId) {
+        if (musicQueue.length > 0 && musicQueue[0].videoId === endedId) musicQueue.shift();
+        currentVideoId = musicQueue.length > 0 ? musicQueue[0].videoId : null;
+        saveQueue().catch(console.error);
+        broadcastQueueUpdate();
+      }
+    }
   });
 
   ws.on('close', () => {
@@ -193,6 +226,10 @@ wss.on('connection', (ws) => {
 
   ws.on('error', () => clients.delete(ws));
 });
+
+function broadcastQueueUpdate() {
+  broadcast({ type: 'queue_update', queue: musicQueue, currentVideoId });
+}
 
 function broadcast(data) {
   const msg = JSON.stringify(data);
@@ -210,16 +247,20 @@ async function start() {
   colStrokes = db.collection('strokes');
   colUsers   = db.collection('users');
   colChat    = db.collection('chat');
+  colQueue   = db.collection('queue');
   console.log('MongoDB connected!');
 
   // Load data into memory
   const sDoc = await colStrokes.findOne({ _id: 'main' });
   const uDoc = await colUsers.findOne({ _id: 'main' });
   const cDoc = await colChat.findOne({ _id: 'main' });
-  strokes = sDoc?.data || [];
-  users   = uDoc?.data || {};
-  chatAll = cDoc?.data || [];
-  console.log(`Loaded: ${strokes.length} strokes, ${Object.keys(users).length} users, ${chatAll.length} chat msgs`);
+  const qDoc = await colQueue.findOne({ _id: 'main' });
+  strokes       = sDoc?.data || [];
+  users         = uDoc?.data || {};
+  chatAll       = cDoc?.data || [];
+  musicQueue    = qDoc?.data || [];
+  currentVideoId = qDoc?.currentVideoId || null;
+  console.log(`Loaded: ${strokes.length} strokes, ${Object.keys(users).length} users, ${chatAll.length} chat msgs, ${musicQueue.length} queue items`);
 
   server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
