@@ -188,7 +188,7 @@ body.on-board #drawCanvas { cursor: none !important; }
   .board-container { aspect-ratio: 1/1; height: auto; width: 100%; min-height: unset; border-radius: 0; }
   .right-col { flex-direction: column; height: auto; min-height: unset; padding: 8px; gap: 8px; }
   .right-col.tab-hidden { display: none; }
-  .chat-panel { height: 100vw; min-height: unset; border-radius: 6px; flex-shrink: 0; }
+  .chat-panel { height: calc(100vw - 16px); min-height: unset; border-radius: 6px; flex-shrink: 0; }
   .music-panel { border-radius: 6px; flex-shrink: 0; }
   .header-left { top: 10px; left: 6px; gap: 3px; }
   .join-btn-header { top: 10px; right: 6px; font-size: 0.85rem; padding: 5px 10px; }
@@ -376,6 +376,8 @@ body.on-board #drawCanvas { cursor: none !important; }
   <div class="footer-bottom">✦ draw something, ser ✦ everyone sees it live ✦<br/><span style="opacity:0.4;font-size:0.55rem">© 2025 HO LEE CHIT</span></div>
 </div>
 
+<button id="muteBtn" onclick="toggleMute()" title="Mute/Unmute music">🔊 SOUND</button>
+
 <div class="live-badge"><div class="live-dot"></div><span id="onlineCount">1</span> online</div>
 <div class="ws-status" id="wsStatus">connecting...</div>
 
@@ -538,9 +540,8 @@ let mx = 0, my = 0;
 // Chopsticks are to the LEFT of sushi, tips pointing RIGHT toward sushi
 // sticks go from far-left (back of chopsticks) to near sushi (tips)
 function drawChopsticks(x, y, clicking) {
+  // sushi size ~70% of original (was rx7,ry5 -> now ~5,3.5)
   const sw = 5, sh = 3.5;
-
-  // Sushi at pointer (x,y)
   sushiRice.setAttribute('cx', x); sushiRice.setAttribute('cy', y);
   sushiRice.setAttribute('rx', sw); sushiRice.setAttribute('ry', sh);
   sushiNori.setAttribute('transform', `translate(${x},${y - 1.5})`);
@@ -548,24 +549,18 @@ function drawChopsticks(x, y, clicking) {
   sushiFish.setAttribute('transform', `translate(${x},${y - 2.5})`);
   sushiFish.setAttribute('rx', sw - 1.5); sushiFish.setAttribute('ry', 2);
 
-  // Pivot point: where both sticks meet (far right, closed end)
-  const pivotX = x + 60;
-  const pivotY = y;
-
-  // Near end: hovers above/below sushi center
-  // idle: sh+4 = just outside sushi vertically
-  // click: sh-1 = touching sushi surface
-  const nearX = x;  // aligned with sushi center horizontally
-  const openY  = sh + 5;   // idle — hovering just outside sushi
-  const closedY = sh - 1;  // click — touching sushi top/bottom
-
-  const spread = clicking ? closedY : openY;
-
-  chop1.setAttribute('x1', nearX); chop1.setAttribute('y1', y - spread);
-  chop1.setAttribute('x2', pivotX); chop1.setAttribute('y2', pivotY);
-
-  chop2.setAttribute('x1', nearX); chop2.setAttribute('y1', y + spread);
-  chop2.setAttribute('x2', pivotX); chop2.setAttribute('y2', pivotY);
+  // chopstick tips point to sushi — offset a bit to the left
+  const tipX = x - sw - 4; // tip ends just left of sushi
+  const tipY = y;
+  // sticks are 40px long, spread at the back (far left)
+  const stickLen = 40;
+  const spread = clicking ? 1 : 8; // vertical spread at back end
+  // upper stick: back is upper-left, tip is at sushi level
+  chop1.setAttribute('x1', tipX - stickLen); chop1.setAttribute('y1', tipY - spread);
+  chop1.setAttribute('x2', tipX);            chop1.setAttribute('y2', tipY - 1);
+  // lower stick: back is lower-left, tip is at sushi level
+  chop2.setAttribute('x1', tipX - stickLen); chop2.setAttribute('y1', tipY + spread);
+  chop2.setAttribute('x2', tipX);            chop2.setAttribute('y2', tipY + 1);
 }
 
 if (!isTouchDevice) {
@@ -671,6 +666,22 @@ function playVideo(videoId) {
   if (!ytReady||!ytPlayer||!ytPlayer.loadVideoById) { setTimeout(()=>playVideo(videoId),500); return; }
   currentVideoId=videoId;
   try { ytPlayer.loadVideoById({videoId,startSeconds:0}); ytPlayer.setVolume(80); } catch(e){}
+}
+
+// ── Mute ─────────────────────────────────────────────────
+let isMuted = false;
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('muteBtn');
+  if (isMuted) {
+    if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
+    btn.textContent = '🔇 MUTED';
+    btn.classList.add('muted');
+  } else {
+    if (ytPlayer && ytPlayer.unMute) ytPlayer.unMute();
+    btn.textContent = '🔊 SOUND';
+    btn.classList.remove('muted');
+  }
 }
 
 function playRadio() {
