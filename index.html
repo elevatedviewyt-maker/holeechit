@@ -152,11 +152,15 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.6)} }
 
 /* CURSOR */
-.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; font-size: 24px; display: none; line-height: 1; }
-#cursorPen { transform: translate(-15%, -85%); }
-#cursorEraser { transform: translate(-40%, -60%); }
-.pen-mode #drawCanvas { cursor: none; }
-.eraser-mode #drawCanvas { cursor: none; }
+.cursor-custom { position: fixed; pointer-events: none; z-index: 9999; display: none; }
+#chopstickCursor { width: 0; height: 0; }
+#chopstickCursor svg { position: fixed; pointer-events: none; z-index: 9999; display: none; }
+body.pen-mode #drawCanvas, body.eraser-mode #drawCanvas { cursor: none; }
+body.chop-mode * { cursor: none !important; }
+
+/* Mobile music tap button */
+.music-tap-btn { display: none; width: 100%; background: #FFD700; border: none; color: #1a0a00; font-family: "Bebas Neue", cursive; font-size: 1.1rem; padding: 10px; letter-spacing: 0.08em; cursor: pointer; }
+@media (max-width: 768px) { .music-tap-btn { display: block; } }
 
 /* FOOTER */
 .footer-section { background: #0e0500; border-top: 2px solid #3a2000; padding: 32px 24px 20px; }
@@ -185,7 +189,7 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
   .board-container { aspect-ratio: 1/1; height: auto; width: 100%; min-height: unset; border-radius: 0; }
   .right-col { flex-direction: column; height: auto; min-height: unset; padding: 8px; gap: 8px; }
   .right-col.tab-hidden { display: none; }
-  .chat-panel { height: 300px; min-height: unset; border-radius: 6px; flex-shrink: 0; }
+  .chat-panel { height: 100vw; min-height: unset; border-radius: 6px; flex-shrink: 0; }
   .music-panel { border-radius: 6px; flex-shrink: 0; }
   .header-left { top: 10px; left: 6px; gap: 3px; }
   .join-btn-header { top: 10px; right: 6px; font-size: 0.85rem; padding: 5px 10px; }
@@ -199,8 +203,11 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
 <body>
 
 <div id="ytPlayer"></div>
-<div class="cursor-custom" id="cursorPen">✏️</div>
-<div class="cursor-custom" id="cursorEraser">🧽</div>
+<!-- Chopstick cursor SVG -->
+<svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible" width="60" height="60" viewBox="0 0 60 60">
+  <line id="chop1" x1="10" y1="0" x2="30" y2="55" stroke="#c8941a" stroke-width="4" stroke-linecap="round"/>
+  <line id="chop2" x1="20" y1="0" x2="30" y2="55" stroke="#c8941a" stroke-width="4" stroke-linecap="round"/>
+</svg>
 
 <!-- FULL-PAGE JOIN OVERLAY -->
 <div class="join-overlay" id="joinOverlay">
@@ -297,6 +304,7 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
     <!-- MUSIC -->
     <div class="music-panel" id="musicPanel">
       <div class="music-header">🎵 MUSIC QUEUE</div>
+      <button class="music-tap-btn" id="musicTapBtn" onclick="startMusicMobile()">▶ TAP TO START MUSIC</button>
       <div class="now-playing">
         <div class="now-playing-label">NOW PLAYING</div>
         <div class="now-playing-title">
@@ -498,18 +506,61 @@ function drawStroke(s) {
 }
 function replayStrokes() { ctx.clearRect(0,0,canvas.width,canvas.height); allStrokes.forEach(drawStroke); }
 
-const cursorPen=document.getElementById('cursorPen');
-const cursorEraser=document.getElementById('cursorEraser');
 const isTouchDevice=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
-if (!isTouchDevice) {
-  document.addEventListener('mousemove',(e)=>{ cursorPen.style.left=e.clientX+'px'; cursorPen.style.top=e.clientY+'px'; cursorEraser.style.left=e.clientX+'px'; cursorEraser.style.top=e.clientY+'px'; });
+
+// ── Chopstick cursor ──────────────────────────────────────
+const chopSvg = document.getElementById('chopSvg');
+const chop1 = document.getElementById('chop1');
+const chop2 = document.getElementById('chop2');
+let chopOnBoard = false;
+
+function updateChopsticks(x, y, clicking) {
+  chopSvg.style.left = (x - 30) + 'px';
+  chopSvg.style.top  = (y - 55) + 'px';
+  // closed = chopsticks touching at bottom tip, open = spread at top
+  const spread = clicking ? 0 : 10;
+  chop1.setAttribute('x1', 30 - spread);
+  chop2.setAttribute('x1', 30 + spread);
 }
-function setTool(t) {
-  tool=t;
-  document.getElementById('penBtn').classList.toggle('active',t==='pen');
-  document.getElementById('eraserBtn').classList.toggle('active',t==='eraser');
-  if (isTouchDevice) { cursorPen.style.display='none'; cursorEraser.style.display='none'; document.body.classList.remove('pen-mode','eraser-mode'); canvas.style.cursor='crosshair'; }
-  else { document.body.classList.toggle('pen-mode',t==='pen'); document.body.classList.toggle('eraser-mode',t==='eraser'); cursorPen.style.display=t==='pen'?'block':'none'; cursorEraser.style.display=t==='eraser'?'block':'none'; }
+
+if (!isTouchDevice) {
+  document.addEventListener('mousemove', (e) => {
+    if (chopOnBoard) return; // canvas area uses pen/eraser cursor
+    chopSvg.style.display = 'block';
+    updateChopsticks(e.clientX, e.clientY, false);
+  });
+  document.addEventListener('mousedown', (e) => {
+    if (!chopOnBoard) updateChopsticks(e.clientX, e.clientY, true);
+  });
+  document.addEventListener('mouseup', (e) => {
+    if (!chopOnBoard) updateChopsticks(e.clientX, e.clientY, false);
+  });
+}
+
+function setTool(tl) {
+  tool=tl;
+  document.getElementById('penBtn').classList.toggle('active',tl==='pen');
+  document.getElementById('eraserBtn').classList.toggle('active',tl==='eraser');
+  if (!isTouchDevice) {
+    document.body.classList.toggle('pen-mode',tl==='pen');
+    document.body.classList.toggle('eraser-mode',tl==='eraser');
+  } else {
+    canvas.style.cursor='crosshair';
+  }
+}
+
+// Show pen/eraser cursor only when hovering the canvas
+if (!isTouchDevice) {
+  canvas.addEventListener('mouseenter', () => {
+    chopOnBoard = true;
+    chopSvg.style.display = 'none';
+    document.body.classList.add(tool==='eraser' ? 'eraser-mode' : 'pen-mode');
+  });
+  canvas.addEventListener('mouseleave', () => {
+    chopOnBoard = false;
+    chopSvg.style.display = 'block';
+    document.body.classList.remove('pen-mode','eraser-mode');
+  });
 }
 setTool('pen');
 document.getElementById('sizeSlider').addEventListener('input',(e)=>{size=parseInt(e.target.value);document.getElementById('sizeLabel').textContent=size;});
@@ -531,7 +582,7 @@ canvas.addEventListener('mouseleave',endDraw);
 canvas.addEventListener('touchstart',(e)=>{if(!currentUser)return;e.preventDefault();const p=getPos(e);drawing=true;lastX=p.x;lastY=p.y;currentPoints=[p];},{passive:false});
 canvas.addEventListener('touchmove',(e)=>{if(!drawing||!currentUser)return;e.preventDefault();const p=getPos(e);drawLive(lastX,lastY,p.x,p.y);currentPoints.push(p);lastX=p.x;lastY=p.y;},{passive:false});
 canvas.addEventListener('touchend',endDraw);
-function clearBoard(){if(!confirm('Ho Lee Chit! Clear the entire board for everyone?'))return;allStrokes=[];ctx.clearRect(0,0,canvas.width,canvas.height);if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'clear'}));}
+function clearBoard(){if(!confirm(t('clearConfirm')))return;allStrokes=[];ctx.clearRect(0,0,canvas.width,canvas.height);if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'clear'}));}
 
 // ── Music ─────────────────────────────────────────────────
 let ytPlayer=null, ytReady=false;
@@ -569,9 +620,16 @@ function playVideo(videoId) {
 }
 
 function playRadio() {
-  document.getElementById('npText').textContent='— radio —';
+  document.getElementById('npText').textContent = t('radio');
   document.getElementById('eqBars').classList.add('playing');
   playVideo(RADIO_ID);
+}
+
+function startMusicMobile() {
+  const btn = document.getElementById('musicTapBtn');
+  if (btn) btn.style.display = 'none';
+  if (!currentVideoId || currentVideoId === RADIO_ID) playRadio();
+  else playVideo(currentVideoId);
 }
 
 function handleQueueUpdate(queue, nowId) {
@@ -679,7 +737,128 @@ window.addEventListener('resize',()=>{
   resizeCanvas(); replayStrokes();
 });
 
-function setLang(l){document.getElementById('btnEN').classList.toggle('active',l==='en');document.getElementById('btnZH').classList.toggle('active',l==='zh');}
+// ── i18n ──────────────────────────────────────────────────
+const T = {
+  en: {
+    joinTitle: 'JOIN THE BOARD', joinSub: 'enter your details to draw & chat, ser',
+    joinBtn: 'LET ME IN 🖊️', joinNamePh: 'Your name / nickname',
+    joinBtcPh: 'Bitcoin address (bc1...) — optional',
+    joinErrName: 'Please enter at least your name!',
+    profileTitle: 'YOUR PROFILE', save: 'SAVE', close: 'CLOSE', logout: 'LOGOUT',
+    pencil: 'PENCIL', sponge: 'SPONGE', size: 'SIZE', color: 'COLOR', clearAll: 'CLEAR ALL',
+    liveChat: '💬 LIVE CHAT', joinToChat: 'Join to chat', saySomething: 'say something...',
+    musicQueue: '🎵 MUSIC QUEUE', nowPlaying: 'NOW PLAYING', radio: '— radio —',
+    queueInfo: '🎵 Paste a YouTube link below to add your song to the queue. Max 8 min per song. One song at a time — once yours plays, you can add another.',
+    queuePh: 'youtube.com/watch?v=...', add: 'ADD',
+    tapMusic: '▶ TAP TO START MUSIC',
+    tabDraw: '✏️ DRAW', tabChat: '💬 CHAT', tabMusic: '🎵 MUSIC',
+    subtitle: '$HooLeeChit on Bitcoin',
+    footerBoard: 'BOARD RULES', footerChat: 'CHAT RULES', footerMusic: 'MUSIC RULES',
+    boardRules: ['Draw anything — it\'s visible to everyone live','No hate symbols, slurs, or explicit content','Clear All resets the board for everyone','Strokes are saved — board persists across sessions'],
+    chatRules: ['Be respectful — no harassment or spam','Chat history is permanent and stored','Your name must be unique — pick something fun','No impersonation of other users'],
+    musicRules: ['YouTube links only — max 8 minutes per song','One song per user at a time','After your song ends, you can add another','Radio plays automatically when queue is empty'],
+    footerTagline: '✦ draw something, ser ✦ everyone sees it live ✦',
+    online: 'online', connecting: 'connecting...', live: '● live', reconnecting: '⚠ reconnecting...', offline: '⚠ offline',
+    clearConfirm: 'Ho Lee Chit! Clear the entire board for everyone?',
+    queueJoinFirst: 'Join the board first!', queueWait: 'Wait for your song to finish first!',
+    queueInvalid: 'Invalid YouTube link!', queueChecking: 'Checking...', queueAdded: '✓ Added!',
+    queueCantLoad: "Can\'t load that video — might be private or restricted.",
+    queueCantVerify: "Couldn\'t verify the link.",
+    nameRequired: 'Name required',
+  },
+  zh: {
+    joinTitle: '加入画板', joinSub: '输入你的信息开始画画，朋友',
+    joinBtn: '进入 🖊️', joinNamePh: '你的名字 / 昵称',
+    joinBtcPh: '比特币地址 (bc1...) — 选填',
+    joinErrName: '请至少输入你的名字！',
+    profileTitle: '你的资料', save: '保存', close: '关闭', logout: '退出',
+    pencil: '画笔', sponge: '橡皮', size: '大小', color: '颜色', clearAll: '清除全部',
+    liveChat: '💬 实时聊天', joinToChat: '加入后才能聊天', saySomething: '说点什么...',
+    musicQueue: '🎵 音乐队列', nowPlaying: '正在播放', radio: '— 电台 —',
+    queueInfo: '🎵 粘贴YouTube链接添加你的歌曲。每首最多8分钟，每次只能加一首——你的歌播完后可以再加。',
+    queuePh: 'youtube.com/watch?v=...', add: '添加',
+    tapMusic: '▶ 点击开始播放音乐',
+    tabDraw: '✏️ 画画', tabChat: '💬 聊天', tabMusic: '🎵 音乐',
+    subtitle: '比特币上的 $HooLeeChit',
+    footerBoard: '画板规则', footerChat: '聊天规则', footerMusic: '音乐规则',
+    boardRules: ['随便画——所有人实时可见','禁止仇恨符号、侮辱或露骨内容','清除全部会重置所有人的画板','笔触已保存，画板在会话间持续存在'],
+    chatRules: ['请互相尊重——禁止骚扰或刷屏','聊天记录永久保存','名字必须唯一——取个有趣的名字','禁止冒充其他用户'],
+    musicRules: ['仅限YouTube链接——每首最多8分钟','每位用户每次只能加一首','你的歌播完后可以再加一首','队列为空时自动播放电台'],
+    footerTagline: '✦ 画点什么，朋友 ✦ 所有人实时可见 ✦',
+    online: '在线', connecting: '连接中...', live: '● 实时', reconnecting: '⚠ 重连中...', offline: '⚠ 离线',
+    clearConfirm: '确定要清除所有人的画板吗？',
+    queueJoinFirst: '请先加入画板！', queueWait: '请等你的歌播完！',
+    queueInvalid: '无效的YouTube链接！', queueChecking: '检查中...', queueAdded: '✓ 已添加！',
+    queueCantLoad: '无法加载该视频——可能是私密或受限内容。',
+    queueCantVerify: '无法验证链接。',
+    nameRequired: '名字不能为空',
+  }
+};
+let currentLang = 'en';
+
+function t(key) { return T[currentLang][key] || T.en[key] || key; }
+
+function setLang(l) {
+  currentLang = l;
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnZH').classList.toggle('active', l==='zh');
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const l = currentLang;
+  // Header
+  document.querySelector('.subtitle').textContent = t('subtitle');
+  document.getElementById('joinBtn').textContent = currentUser ? '👤 '+currentUser.name : t('joinTitle').replace('JOIN THE BOARD','JOIN').replace('加入画板','加入');
+  // Join overlay
+  document.querySelector('.join-box h2').textContent = t('joinTitle');
+  document.querySelector('.join-box p').textContent = t('joinSub');
+  document.querySelector('.join-submit').textContent = t('joinBtn');
+  document.getElementById('inputName').placeholder = t('joinNamePh');
+  document.getElementById('inputBtc').placeholder = t('joinBtcPh');
+  // Toolbar
+  document.querySelector('#penBtn span')?.remove();
+  document.getElementById('penBtn').innerHTML = '✏️ ' + t('pencil');
+  document.querySelector('#eraserBtn span')?.remove();
+  document.getElementById('eraserBtn').innerHTML = '🧽 ' + t('sponge');
+  document.querySelectorAll('.label')[0].textContent = t('size');
+  document.querySelectorAll('.label')[2].textContent = t('color');
+  document.querySelector('.clear-btn').innerHTML = '🗑️ ' + t('clearAll');
+  // Tabs
+  document.getElementById('tabDraw').textContent = t('tabDraw');
+  document.getElementById('tabChat').textContent = t('tabChat');
+  document.getElementById('tabMusic').textContent = t('tabMusic');
+  // Chat
+  document.querySelector('.chat-header').textContent = t('liveChat');
+  document.getElementById('chatLocked').textContent = t('joinToChat');
+  const ci = document.getElementById('chatInput');
+  if (ci) ci.placeholder = t('saySomething');
+  // Music
+  document.querySelector('.music-header').textContent = t('musicQueue');
+  document.querySelector('.now-playing-label').textContent = t('nowPlaying');
+  document.querySelector('.queue-info').textContent = t('queueInfo');
+  document.getElementById('queueInput').placeholder = t('queuePh');
+  document.getElementById('queueAddBtn').textContent = t('add');
+  const tapBtn = document.getElementById('musicTapBtn');
+  if (tapBtn) tapBtn.textContent = t('tapMusic');
+  const npText = document.getElementById('npText');
+  if (npText && (npText.textContent === '— radio —' || npText.textContent === '— 电台 —')) npText.textContent = t('radio');
+  // Profile modal
+  document.querySelector('.modal-box h2').textContent = t('profileTitle');
+  document.querySelector('.modal-save').textContent = t('save');
+  document.querySelector('.modal-close').textContent = t('close');
+  document.querySelector('.modal-logout').textContent = t('logout');
+  // Footer
+  const footerTitles = document.querySelectorAll('.footer-block-title');
+  const footerRuleLists = document.querySelectorAll('.footer-rule');
+  if (footerTitles[0]) footerTitles[0].textContent = t('footerBoard');
+  if (footerTitles[1]) footerTitles[1].textContent = t('footerChat');
+  if (footerTitles[2]) footerTitles[2].textContent = t('footerMusic');
+  ['boardRules','chatRules','musicRules'].forEach((key,i)=>{
+    if (footerRuleLists[i]) footerRuleLists[i].innerHTML = t(key).map(r=>`<li>${r}</li>`).join('');
+  });
+  document.querySelector('.footer-bottom').innerHTML = t('footerTagline')+'<br/><span style="opacity:0.4;font-size:0.55rem">© 2025 HO LEE CHIT</span>';
+}
 
 // ── Keyboard shortcuts ────────────────────────────────────
 document.addEventListener('keydown',(e)=>{
@@ -691,6 +870,7 @@ document.getElementById('queueInput')?.addEventListener('keydown',(e)=>{if(e.key
 
 // ── Init ──────────────────────────────────────────────────
 loadUser(); updateUI(); connect();
+applyTranslations();
 if (isMobile()) switchTab('draw');
 
 // Load YouTube API
@@ -698,8 +878,11 @@ const ytTag=document.createElement('script');
 ytTag.src='https://www.youtube.com/iframe_api';
 document.head.appendChild(ytTag);
 
-// Start radio after YT ready (with delay for user gesture on mobile)
-setTimeout(()=>{ if(ytReady&&!currentVideoId) playRadio(); },3000);
+// On desktop start radio automatically after a short delay
+// On mobile, user must tap the button (browser autoplay policy)
+if (!isTouchDevice) {
+  setTimeout(()=>{ if(ytReady&&!currentVideoId) playRadio(); },3000);
+}
 </script>
 </body>
 </html>
