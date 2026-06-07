@@ -205,15 +205,15 @@ body.on-board #drawCanvas { cursor: none !important; }
 <!-- Cursors -->
 <!-- Chopstick cursor (shown outside board) -->
 <svg id="chopSvg" style="position:fixed;pointer-events:none;z-index:9999;display:none;overflow:visible;top:0;left:0;width:100vw;height:100vh">
-  <!-- left chopstick -->
-  <line id="chop1" stroke="#c8941a" stroke-width="3" stroke-linecap="round"/>
-  <!-- right chopstick -->
-  <line id="chop2" stroke="#8B5E1A" stroke-width="3" stroke-linecap="round"/>
-  <!-- sushi piece at tip -->
+  <!-- upper chopstick -->
+  <line id="chop1" stroke="#c8941a" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- lower chopstick -->
+  <line id="chop2" stroke="#8B5E1A" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- sushi nigiri at cursor tip -->
   <g id="sushiG">
-    <ellipse id="sushiRice" rx="7" ry="5" fill="#f5f0e8" stroke="#ddd" stroke-width="0.5"/>
-    <ellipse id="sushiNori" rx="7" ry="2" fill="#1a1a1a" transform="translate(0,-2)"/>
-    <ellipse id="sushiFish" rx="5" ry="3" fill="#ff6b6b" transform="translate(0,-3.5)"/>
+    <ellipse id="sushiRice" rx="9" ry="6" fill="#f5f0e8" stroke="#ccc" stroke-width="0.5"/>
+    <ellipse id="sushiNori" rx="9" ry="2.5" fill="#1a1a1a" transform="translate(0,-2)"/>
+    <ellipse id="sushiFish" rx="7" ry="3.5" fill="#ff6b6b" transform="translate(0,-3.5)"/>
   </g>
 </svg>
 <!-- Pen cursor (shown on board in pen mode) -->
@@ -534,25 +534,31 @@ const eraserCursor= document.getElementById('eraserCursor');
 let onBoard = false;
 let mx = 0, my = 0;
 
-// Chopstick geometry (half size compared to v1)
-// sushi sits at cursor tip (mx, my)
-// left stick goes up-left, right stick goes up-right
-// they converge at sushi when clicking
+// Chopstick geometry:
+// sushi = cursor hotspot (x, y) on the LEFT
+// chopsticks are further to the LEFT, pointing RIGHT toward sushi
+// they spread up/down at far end, converge at sushi tip on click
 function drawChopsticks(x, y, clicking) {
-  const spread = clicking ? 2 : 18; // px spread at top
-  const stickLen = 55;
-  // tips meet at sushi position
-  const tx = x, ty = y - 6; // slightly above sushi center
-  // tops spread left and right
-  const lx = tx - spread, ly = ty - stickLen;
-  const rx = tx + spread, ry = ty - stickLen;
+  const stickLen = 52;
+  const spread   = clicking ? 1 : 10;
 
-  chop1.setAttribute('x1', lx); chop1.setAttribute('y1', ly);
-  chop1.setAttribute('x2', tx); chop1.setAttribute('y2', ty);
-  chop2.setAttribute('x1', rx); chop2.setAttribute('y1', ry);
-  chop2.setAttribute('x2', tx); chop2.setAttribute('y2', ty);
+  // Chopstick tips meet just to the left of the sushi
+  const tipX = x - 10;
+  const tipY = y;
 
-  // sushi at cursor point
+  // Far ends (left) spread up and down
+  const farX = tipX - stickLen;
+  const topY = tipY - spread;
+  const botY = tipY + spread;
+
+  // Upper chopstick
+  chop1.setAttribute('x1', farX); chop1.setAttribute('y1', topY);
+  chop1.setAttribute('x2', tipX); chop1.setAttribute('y2', tipY);
+  // Lower chopstick
+  chop2.setAttribute('x1', farX); chop2.setAttribute('y1', botY);
+  chop2.setAttribute('x2', tipX); chop2.setAttribute('y2', tipY);
+
+  // Sushi at cursor hotspot
   sushiRice.setAttribute('cx', x); sushiRice.setAttribute('cy', y);
   sushiNori.setAttribute('transform', `translate(${x},${y - 2})`);
   sushiFish.setAttribute('transform', `translate(${x},${y - 3.5})`);
