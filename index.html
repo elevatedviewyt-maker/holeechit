@@ -44,9 +44,10 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
 .clear-btn:hover { background: #ff4444; color: white; }
 
 /* MAIN LAYOUT */
-.board-chat-wrap { display: flex; align-items: stretch; padding: 8px 12px 8px; gap: 10px; background: #1a0a00; width: 100%; box-sizing: border-box; }
-.board-outer { flex-shrink: 0; position: relative; display: flex; flex-direction: column; width: calc(100vh - 220px); max-width: 44%; }
-.board-container { position: relative; aspect-ratio: 1 / 1; width: 100%; max-height: calc(100vh - 220px); border-radius: 0 0 6px 6px; overflow: hidden; flex: 1; }
+:root { --panel-h: calc(100vh - 220px); }
+.board-chat-wrap { display: flex; align-items: flex-start; padding: 8px 12px; gap: 10px; background: #1a0a00; width: 100%; box-sizing: border-box; }
+.board-outer { flex-shrink: 0; position: relative; display: flex; flex-direction: column; height: var(--panel-h); width: var(--panel-h); max-width: 46%; }
+.board-container { position: relative; width: 100%; flex: 1; border-radius: 0 0 6px 6px; overflow: hidden; }
 
 /* Parchment */
 .parchment-bg {
@@ -68,7 +69,7 @@ body { background: #1a0a00; min-height: 100vh; font-family: 'Bebas Neue', cursiv
 #drawCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; z-index: 2; }
 
 /* RIGHT COLUMN — desktop: board | chat | voice+music side by side */
-.right-col { display: flex; flex-direction: row; gap: 10px; flex: 1; min-width: 0; height: calc(100vh - 220px); min-height: 300px; align-items: stretch; }
+.right-col { display: flex; flex-direction: row; gap: 10px; flex: 1; min-width: 0; height: var(--panel-h); align-items: stretch; }
 .chat-col { display: flex; flex-direction: column; flex: 1; min-width: 0; height: 100%; }
 .side-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; height: 100%; }
 
@@ -193,8 +194,14 @@ body.on-board #drawCanvas { cursor: none !important; }
 @media (max-width: 768px) { .music-tap-btn { display: block; } }
 
 /* FOOTER */
-.footer-section { background: #0e0500; border-top: 1px solid #2a1000; padding: 10px 24px; }
-.footer-bottom { text-align: center; font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.25); font-size: 0.58rem; letter-spacing: 0.08em; }
+.footer-section { background: #0e0500; border-top: 2px solid #3a2000; padding: 28px 24px 16px; }
+.footer-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; max-width: 960px; margin: 0 auto 20px; }
+.footer-block { text-align: center; max-width: 260px; }
+.footer-icon { font-size: 2rem; margin-bottom: 8px; }
+.footer-block-title { font-family: 'Bebas Neue', cursive; color: #FFD700; font-size: 1.15rem; letter-spacing: 0.1em; margin-bottom: 10px; }
+.footer-rule { font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.55); font-size: 0.7rem; line-height: 1.8; letter-spacing: 0.02em; text-align: left; }
+.footer-rule li { margin-bottom: 4px; padding-left: 4px; }
+.footer-bottom { text-align: center; font-family: 'Inter', sans-serif; color: rgba(255,215,0,0.3); font-size: 0.6rem; padding-top: 14px; letter-spacing: 0.08em; border-top: 1px solid #2a1000; margin-top: 4px; }
 
 /* MOBILE TABS */
 .mobile-tabs { display: none; border-bottom: 2px solid #FFD700; }
@@ -464,6 +471,38 @@ body.on-board #drawCanvas { cursor: none !important; }
 
 <!-- FOOTER -->
 <div class="footer-section">
+  <div class="footer-grid">
+    <div class="footer-block">
+      <div class="footer-icon">🎨</div>
+      <div class="footer-block-title">BOARD RULES</div>
+      <ul class="footer-rule">
+        <li>Draw anything — it's visible to everyone live</li>
+        <li>No hate symbols, slurs, or explicit content</li>
+        <li>Clear All resets the board for everyone</li>
+        <li>Strokes are saved — board persists across sessions</li>
+      </ul>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">💬</div>
+      <div class="footer-block-title">CHAT RULES</div>
+      <ul class="footer-rule">
+        <li>Be respectful — no harassment or spam</li>
+        <li>Chat history is permanent and stored</li>
+        <li>Your name must be unique — pick something fun</li>
+        <li>No impersonation of other users</li>
+      </ul>
+    </div>
+    <div class="footer-block">
+      <div class="footer-icon">🎵</div>
+      <div class="footer-block-title">MUSIC RULES</div>
+      <ul class="footer-rule">
+        <li>YouTube or NetEase — two independent queues</li>
+        <li>YouTube: max 8 minutes per song</li>
+        <li>One song per user per queue at a time</li>
+        <li>Radio plays automatically when queue is empty</li>
+      </ul>
+    </div>
+  </div>
   <div class="footer-bottom">© 2026 HO LEE CHIT — This is a parody account and should be taken as such. No offence intended.</div>
 </div>
 
