@@ -179,6 +179,31 @@ body.on-board #drawCanvas { cursor: none !important; }
 /* Hidden YT player */
 #ytPlayer { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; }
 
+/* MUTE BUTTON */
+#muteBtn {
+  position: fixed;
+  bottom: 16px;
+  right: 130px;
+  background: rgba(0,0,0,0.88);
+  border: 2px solid #FFD700;
+  color: #FFD700;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.95rem;
+  padding: 6px 13px;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 100;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#muteBtn:hover { background: #FFD700; color: #1a0a00; }
+#muteBtn.muted { border-color: #ff4444; color: #ff4444; }
+#muteBtn.muted:hover { background: #ff4444; color: white; border-color: #ff4444; }
+@media (max-width: 768px) { #muteBtn { right: 16px; bottom: 60px; font-size: 0.8rem; padding: 5px 10px; } }
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .mobile-tabs { display: flex; }
@@ -494,6 +519,7 @@ function connect() {
     }
     if (msg.type==='queue_update') { handleQueueUpdate(msg.queue, msg.currentVideoId); }
     if (msg.type==='queue_err') { const m=document.getElementById('queueMsg'); m.textContent=msg.msg; m.className='queue-msg'; }
+    if (msg.type==='clear_err') { alert(msg.msg); }
   };
   ws.onclose = () => { status.textContent='⚠ reconnecting...'; status.className='ws-status error'; setTimeout(connect,3000); };
   ws.onerror = () => { status.textContent='⚠ offline'; status.className='ws-status error'; };
@@ -658,14 +684,26 @@ function onPlayerStateChange(event) {
     }
   }
 }
-function onPlayerError() {
-  if (ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'song_ended',videoId:currentVideoId}));
+function onPlayerError(event) {
+  // If the radio itself errors, show a message but don't loop forever
+  const isRadio = currentVideoId === RADIO_ID;
+  if (ws&&ws.readyState===WebSocket.OPEN && !isRadio) {
+    ws.send(JSON.stringify({type:'song_ended',videoId:currentVideoId}));
+  } else if (isRadio) {
+    // Radio video unavailable — update now-playing label gracefully
+    document.getElementById('npText').textContent = '— radio unavailable —';
+    document.getElementById('eqBars').classList.remove('playing');
+  }
 }
 
 function playVideo(videoId) {
   if (!ytReady||!ytPlayer||!ytPlayer.loadVideoById) { setTimeout(()=>playVideo(videoId),500); return; }
   currentVideoId=videoId;
-  try { ytPlayer.loadVideoById({videoId,startSeconds:0}); ytPlayer.setVolume(80); } catch(e){}
+  try {
+    ytPlayer.loadVideoById({videoId,startSeconds:0});
+    ytPlayer.setVolume(80);
+    if (isMuted) ytPlayer.mute();
+  } catch(e){}
 }
 
 // ── Mute ─────────────────────────────────────────────────
@@ -678,7 +716,7 @@ function toggleMute() {
     btn.textContent = '🔇 MUTED';
     btn.classList.add('muted');
   } else {
-    if (ytPlayer && ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer && ytPlayer.unMute) { ytPlayer.unMute(); ytPlayer.setVolume(80); }
     btn.textContent = '🔊 SOUND';
     btn.classList.remove('muted');
   }
@@ -830,6 +868,7 @@ const T = {
     queueCantLoad: "Can\'t load that video — might be private or restricted.",
     queueCantVerify: "Couldn\'t verify the link.",
     nameRequired: 'Name required',
+    muteSound: '🔊 SOUND', muteMuted: '🔇 MUTED',
   },
   zh: {
     joinTitle: '加入画板', joinSub: '输入你的信息开始画画，朋友',
@@ -857,6 +896,7 @@ const T = {
     queueCantLoad: '无法加载该视频——可能是私密或受限内容。',
     queueCantVerify: '无法验证链接。',
     nameRequired: '名字不能为空',
+    muteSound: '🔊 声音', muteMuted: '🔇 静音',
   }
 };
 let currentLang = 'en';
@@ -923,6 +963,9 @@ function applyTranslations() {
     if (footerRuleLists[i]) footerRuleLists[i].innerHTML = t(key).map(r=>`<li>${r}</li>`).join('');
   });
   document.querySelector('.footer-bottom').innerHTML = t('footerTagline')+'<br/><span style="opacity:0.4;font-size:0.55rem">© 2025 HO LEE CHIT</span>';
+  // Mute button
+  const muteBtn = document.getElementById('muteBtn');
+  if (muteBtn) muteBtn.textContent = isMuted ? t('muteMuted') : t('muteSound');
 }
 
 // ── Keyboard shortcuts ────────────────────────────────────

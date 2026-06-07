@@ -13,8 +13,14 @@ let strokes = [];
 let users = {};   // { name_lower: { name, btc, createdAt }, ... }
 let chatAll = []; // full history
 const CHAT_BROADCAST_LIMIT = 100;
+const CHAT_MAX_STORED = 500;  // trim chat to last 500 messages in DB
 
 let db, colStrokes, colUsers, colChat, colQueue;
+
+// ── Rate-limit: clear board ───────────────────────────────
+// Max 1 clear every 30 seconds globally
+let lastClearAt = 0;
+const CLEAR_COOLDOWN_MS = 30_000;
 
 // ── Music queue ───────────────────────────────────────────
 let musicQueue = []; // [{ videoId, title, addedBy }]
@@ -28,6 +34,7 @@ async function saveUsers() {
   await colUsers.replaceOne({ _id: 'main' }, { _id: 'main', data: users }, { upsert: true });
 }
 async function saveChat() {
+  if (chatAll.length > CHAT_MAX_STORED) chatAll = chatAll.slice(-CHAT_MAX_STORED);
   await colChat.replaceOne({ _id: 'main' }, { _id: 'main', data: chatAll }, { upsert: true });
 }
 async function saveQueue() {
@@ -122,6 +129,11 @@ wss.on('connection', (ws) => {
     }
 
     if (data.type === 'clear') {
+      const now = Date.now();
+      if (now - lastClearAt < CLEAR_COOLDOWN_MS) {
+        return ws.send(JSON.stringify({ type: 'clear_err', msg: 'Clear on cooldown, try again in a moment.' }));
+      }
+      lastClearAt = now;
       strokes = [];
       saveStrokes().catch(console.error);
       broadcast({ type: 'clear' });
