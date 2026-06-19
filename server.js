@@ -399,7 +399,6 @@ const server = http.createServer(async (req, res) => {
 // ── WebSocket ─────────────────────────────────────────────
 const wss = new WebSocket.Server({ server });
 let clients = new Set();
-const activeClients = new Map();
 
 wss.on('connection', (ws) => {
   clients.add(ws);
